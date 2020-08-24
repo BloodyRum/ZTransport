@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+   This file is part of ZTransport, copyright ©2020 BloodyRum.
+
+   ZTransport is free software: you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free Soft-
+   ware Foundation, either version 3 of the License, or (at your option) any
+   later version.
+
+   ZTransport is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FIT-
+   NESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+   details.
+
+   You should have received a copy of the GNU General Public License along with
+   ZTransport. If not, see <https://www.gnu.org/licenses/>.
+
+-->
+ <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{66483970-A326-4CC2-B82E-94C0C55AAD8C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ZTransport</RootNamespace>
+    <AssemblyName>ZTransport</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\lib\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\lib\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\lib\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\lib\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="GasRecverConfig.cs" />
+    <Compile Include="GasSenderConfig.cs" />
+    <Compile Include="JoulesRecver.cs" />
+    <Compile Include="JoulesRecver1kWConfig.cs" />
+    <Compile Include="JoulesRecver20kWConfig.cs" />
+    <Compile Include="JoulesRecver2kWConfig.cs" />
+    <Compile Include="JoulesRecver50kWConfig.cs" />
+    <Compile Include="JoulesSender.cs" />
+    <Compile Include="JoulesSenderConfig.cs" />
+    <Compile Include="LiquidRecverConfig.cs" />
+    <Compile Include="LiquidSenderConfig.cs" />
+    <Compile Include="MatPacketRecver.cs" />
+    <Compile Include="MatPacketSender.cs" />
+    <Compile Include="Network.cs" />
+    <Compile Include="Patches.cs" />
+    <Compile Include="Z.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
