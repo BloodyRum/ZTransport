@@ -42,6 +42,8 @@ namespace ZTransport {
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
+            ZTransporter ztransporter = go.AddOrGet<ZTransporter>();
+
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddComponent<RequireInputs>();
             BuildingDef def = go.GetComponent<Building>().Def;

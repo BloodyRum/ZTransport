@@ -49,6 +49,8 @@ namespace ZTransport {
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
+            ZTransporter ztransporter = go.AddOrGet<ZTransporter>();
+
             go.AddOrGet<MatPacketSender>().SetConduitType(ConduitType.Gas);
             
             Storage defaultStorage = BuildingTemplates.CreateDefaultStorage(go, false);

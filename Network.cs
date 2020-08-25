@@ -67,11 +67,11 @@ namespace ZTransport
             : base(message, inner) {}
     }
     public class Network {
-        TcpClient client;
         NetworkStream stream;
         Thread read_thread, write_thread = null;
         // access to any of the following variables must be protected by a lock
         // on "this":
+        TcpClient client;
         BlockingCollection<JObject> outgoing_messages
             = new BlockingCollection<JObject>(new ConcurrentQueue<JObject>());
         Dictionary<Point, JObject> last_request_for_tile
@@ -80,15 +80,30 @@ namespace ZTransport
             = new Dictionary<Point, JObject>();
         
         bool connection_active = false;
+        bool reconnecting = false;
         // exception to locking rule: outgoing_messages
         // do not need a lock in order to get a message *out of* them
-        Int32 cookie = 0;
+        uint cookie = 0;
 
-        public Network(string address, UInt16 port) {
-            read_thread = new Thread(new ThreadStart(() => read_thread_function(address, port)));
+        string address;
+        ushort port;
+        
+        public Network() {
+            read_thread = new Thread(new ThreadStart(() => read_thread_function())); 
             read_thread.IsBackground = true;
-
             read_thread.Start();
+        }
+
+        public void connect(string address, ushort port) {
+            lock(this) {
+                if (client != null) {
+                    reconnecting = true;
+                    client.Close();
+                }
+                this.address = address;
+                this.port = port;
+                Monitor.Pulse(this);
+            }
         }
 
         private void write_directly(JObject message) {
@@ -203,12 +218,16 @@ namespace ZTransport
             }
         }
 
-        public void read_thread_function(string address, UInt16 port) {
+        public void read_thread_function() {
             connection_active = false;
             
             while(true) {
                 try {
-                    client = new TcpClient(address, port);
+                    lock(this) {
+                        while(address == null) Monitor.Wait(this);
+                        client = new TcpClient(address, port);
+                        reconnecting = false;
+                    }
                 }
                 catch (SocketException e) {
                     Debug.Log("Z-Transport: Unable to connect: " + e.Message);
@@ -280,6 +299,11 @@ namespace ZTransport
                 catch(ServerDiedException) {
                     Debug.Log("Z-Transport: Server connection closed.");
                 }
+                catch(IOException) {
+                    if (!reconnecting) {
+                        Debug.Log("Z-Transport: Server connection interrupted.");
+                    }
+                }
                 catch(KeyNotFoundException e) {
                     Debug.Log("Z-Transport: The server spoke wrongly: "+e);
                 }
@@ -314,7 +338,10 @@ namespace ZTransport
                 // be tidy
                 write_thread = null;
                 client.Close();
-                client = null;
+                lock (this) {
+                    client = null;
+                    if(reconnecting) continue;
+                }
                 Thread.Sleep(5000);
             }
         }

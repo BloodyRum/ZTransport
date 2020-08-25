@@ -15,10 +15,20 @@
  * ZTransport. If not, see <https://www.gnu.org/licenses/>.
  */
 
+namespace STRINGS {
+    public static class ZTRANSPORT {
+        public static LocString SETTINGS_BUTTON = (LocString)"ZTransport";
+        public static LocString SETTINGS_TOOLTIP = (LocString)"Configure ZTransport connection settings for this world. (NOT IMPLEMENTED YET)";
+    }
+}
+
 namespace ZTransport
 {
     public static class Z
     {
+        public static string address;
+        public static ushort port = 5496;
+        
         public static Network net;
     }
 }

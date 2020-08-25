@@ -27,7 +27,7 @@ namespace ZTransport
         {
             public static void OnLoad()
             {
-                Z.net = new Network("sigma.tejat.net", 5496);
+                Z.net = new Network();
             }
         }
 
