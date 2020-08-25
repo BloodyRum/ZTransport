@@ -42,11 +42,10 @@ namespace ZTransport {
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
-            ZTransporter ztransporter = go.AddOrGet<ZTransporter>();
+            go.AddOrGet<ZTransporter>();
 
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddComponent<RequireInputs>();
-            BuildingDef def = go.GetComponent<Building>().Def;
             Battery battery = go.AddOrGet<Battery>();
             battery.capacity = MAX_STORED_JOULES;
             battery.joulesLostPerSecond = 0f;
