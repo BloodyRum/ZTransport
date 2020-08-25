@@ -21,9 +21,11 @@ using PeterHan.PLib.UI;
 
 namespace ZTransport {
     public class ZTransporter : KMonoBehaviour {
-        #pragma warning disable 414
+        #pragma warning disable 414, 649
         private static readonly EventSystem.IntraObjectHandler<ZTransporter> RefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<ZTransporter>((System.Action<ZTransporter, object>) ((component, data) => component.RefreshUserMenu(data)));
-        #pragma warning restore 414
+        [MyCmpReq]
+        private KSelectable selectable;
+        #pragma warning restore 414, 649
 
         private static string address;
         private static ushort port;
@@ -45,6 +47,8 @@ namespace ZTransport {
         protected override void OnSpawn() {
             base.OnSpawn();
             this.Subscribe<ZTransporter>(493375141, ZTransporter.RefreshUserMenuDelegate);
+            selectable.SetStatusItem(Db.Get().StatusItemCategories.Main,
+                                     Z.coordinates, (object)this);
         }
 
         private void PressItBaby() {

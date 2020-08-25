@@ -19,6 +19,12 @@ namespace STRINGS {
     public static class ZTRANSPORT {
         public static LocString SETTINGS_BUTTON = (LocString)"ZTransport";
         public static LocString SETTINGS_TOOLTIP = (LocString)"Configure ZTransport connection settings for this world. (NOT IMPLEMENTED YET)";
+        public static class STATUSITEMS {
+            public static class ZCOORDINATES {
+                public static LocString NAME = (LocString)"Coordinates: {X}, {Y}";
+                public static LocString TOOLTIP = (LocString)"This can connect with ZTransporters on other Z-levels at coordinates {X}, {Y}";
+            }
+        }
     }
 }
 
@@ -28,6 +34,7 @@ namespace ZTransport
     {
         public static string address;
         public static ushort port = 5496;
+        public static StatusItem coordinates;
         
         public static Network net;
     }

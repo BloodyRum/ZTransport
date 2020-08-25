@@ -18,6 +18,9 @@
 using Harmony;
 using System;
 using System.Collections.Generic;
+using Database;
+using PeterHan.PLib;
+using PeterHan.PLib.Datafiles;
 
 namespace ZTransport
 {
@@ -27,13 +30,33 @@ namespace ZTransport
         {
             public static void OnLoad()
             {
+                PUtil.InitLibrary(true);
+                PLocalization.Register();
                 Z.net = new Network();
             }
         }
 
+        [HarmonyPatch(typeof(BuildingStatusItems), "CreateStatusItems")]
+        public class CreateStatusItems {
+            public static void Postfix(BuildingStatusItems __instance) {
+                Z.coordinates = new StatusItem("ZCoordinates", "ZTRANSPORT","",
+                                               StatusItem.IconType.Info,
+                                               NotificationType.Neutral,
+                                               false,
+                                               OverlayModes.None.ID);
+                Z.coordinates.resolveStringCallback = (str, data) => {
+                    int x, y;
+                    ZTransporter transporter = (ZTransporter)data;
+                    Grid.CellToXY(Grid.PosToCell(transporter), out x, out y);
+                    return str.Replace("{X}", x.ToString())
+                        .Replace("{Y}", y.ToString());
+                };
+                __instance.Add(Z.coordinates);
+            }
+        }
         [HarmonyPatch(typeof(GeneratedBuildings), "LoadGeneratedBuildings")]
         public class LoadGeneratedBuildings {
-            public static void Prefix() {
+            public static void Postfix() {
                 Strings.Add("STRINGS.BUILDINGS.PREFABS.ZJOULESRECVER1KW.NAME",
                             "Z Power Receiver 1kW");
                 Strings.Add("STRINGS.BUILDINGS.PREFABS.ZJOULESRECVER1KW.DESC",
