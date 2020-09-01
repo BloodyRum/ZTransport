@@ -164,7 +164,6 @@ namespace ZTransport {
                     if (mat_packet["germs"] != null
                         && mat_packet["germs"].Type == JTokenType.Object) {
                         germ_packet = (JObject) mat_packet["germs"];
-                        // germ_packet can't be accessed anymore after here
                     }
                     if (dave == null) {
                         dave = GasSourceManager.Instance.CreateChunk(
@@ -176,11 +175,10 @@ namespace ZTransport {
                     steve.SetElement((SimHashes)((int) mat_packet["element"]));
                     steve.SetMassTemperature((float) mat_packet["mass"],
                                             (float) mat_packet["temperature"]);
+                    string reason = conduitType == ConduitType.Liquid
+                        ? "Storage.AddLiquid" : "Storage.AddGasChunk";
+                    steve.ModifyDiseaseCount(-steve.DiseaseCount, reason);
                     if (germ_packet != null) {
-                        string reason = conduitType == ConduitType.Liquid
-                            ? "Storage.AddLiquid" : "Storage.AddGasChunk";
-                        steve.ModifyDiseaseCount(-steve.DiseaseCount,
-                                                 reason);
                         steve.AddDisease((byte) germ_packet["id"],
                                          (int) germ_packet["count"],
                                          reason);
