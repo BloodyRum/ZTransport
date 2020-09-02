@@ -54,6 +54,7 @@ namespace ZTransport
                 __instance.Add(Z.coordinates);
             }
         }
+
         [HarmonyPatch(typeof(GeneratedBuildings), "LoadGeneratedBuildings")]
         public class LoadGeneratedBuildings {
             public static void Postfix() {
@@ -125,6 +126,31 @@ namespace ZTransport
                             "Takes liquid from another Z level");
                 ModUtil.AddBuildingToPlanScreen("Plumbing", LiquidRecverConfig.ID);
 
+            }
+        }
+
+        [HarmonyPatch(typeof(SaveGame), "OnPrefabInit")]
+        public class SaveGameComponentPatch {
+            public static void Postfix(SaveGame __instance) {
+                __instance.gameObject.AddComponent<ZServerInfoSaver>();
+            }
+        }
+        
+        [HarmonyPatch(typeof(SaveLoader), "Load", new Type[]{typeof(IReader)})]
+        public class DontLoadThatRoad {
+            public static void Prefix() {
+                Z.address = null;
+                Z.port = Z.DEFAULT_PORT;
+                Z.net.connect(Z.address, Z.port);
+            }
+        }
+
+        [HarmonyPatch(typeof(MainMenu), "OnSpawn")]
+        public class SeriouslyDontLoadThatRoad {
+            public static void Prefix() {
+                Z.address = null;
+                Z.port = Z.DEFAULT_PORT;
+                Z.net.connect(Z.address, Z.port);
             }
         }
     }

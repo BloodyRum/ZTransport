@@ -101,7 +101,7 @@ namespace ZTransport {
                     TextStyle = PUITuning.Fonts.TextDarkStyle,
                     FlexSize = Vector2.right,
                     ToolTip = "Port number of onizd server. Leave empty to "
-                    +"use the default port (5496).", //TODO: LocString
+                    +"use the default port.", //TODO: LocString
                     OnTextChanged = ServerPortChanged,
                     OnValidate = ServerPortValidate,
                 });
@@ -123,7 +123,7 @@ namespace ZTransport {
             if (!neu.Equals("")) {
                 port = ushort.Parse(neu);
             } else {
-                port = 5496;
+                port = Z.DEFAULT_PORT;
             }
         }
 

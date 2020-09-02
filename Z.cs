@@ -32,8 +32,9 @@ namespace ZTransport
 {
     public static class Z
     {
+        public const ushort DEFAULT_PORT = 5496;
         public static string address;
-        public static ushort port = 5496;
+        public static ushort port = DEFAULT_PORT;
         public static StatusItem coordinates;
         
         public static Network net;
