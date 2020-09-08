@@ -159,6 +159,7 @@ namespace ZTransport
             public static void Prefix() {
                 Z.address = null;
                 Z.port = Z.DEFAULT_PORT;
+                Z.ping_interval = Z.DEFAULT_PING_INTERVAL;
                 Z.net.connect(Z.address, Z.port);
             }
         }
@@ -168,6 +169,7 @@ namespace ZTransport
             public static void Prefix() {
                 Z.address = null;
                 Z.port = Z.DEFAULT_PORT;
+                Z.ping_interval = Z.DEFAULT_PING_INTERVAL;
                 Z.net.connect(Z.address, Z.port);
             }
         }

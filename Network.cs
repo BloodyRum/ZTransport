@@ -68,7 +68,7 @@ namespace ZTransport
     }
     public class Network {
         NetworkStream stream;
-        Thread read_thread, write_thread = null;
+        Thread read_thread, write_thread, ping_thread;
         // access to any of the following variables must be protected by a lock
         // on "this":
         TcpClient client;
@@ -119,6 +119,21 @@ namespace ZTransport
             while(true) {
                 JObject next_message_to_send = outgoing_messages.Take();
                 write_directly(next_message_to_send);
+            }
+        }
+
+        public void ping_thread_function() {
+            JObject ping = new JObject();
+            ping.Add("type", "ping");
+            while(true) {
+                int ping_interval = Z.ping_interval;
+                if (ping_interval != 0) {
+                    Thread.Sleep(ping_interval * 1000);
+                    // *1000 because sleep is expecting ms, not s
+                    send_message(ping);
+                } else {
+                    Thread.Sleep(5000);
+                }
             }
         }
 
@@ -266,9 +281,21 @@ namespace ZTransport
                 write_thread.IsBackground = true;
                 write_thread.Start();
 
+                ping_thread = new Thread(new ThreadStart(() => ping_thread_function()));
+                ping_thread.IsBackground = true;
+                ping_thread.Start();
+
                 try {
                     while(true) {
                         JObject message = read_directly(sr);
+
+                        if ((string)message["type"] == "ping") {
+                            JObject pong = new JObject();
+                            pong.Add("type", "pong");
+                            send_message(pong);
+                            continue;
+                        }
+
                         lock(this) {
                             Point tile_got = Point.extract_from_message(message);
                             if (tile_got != null) {
@@ -347,10 +374,13 @@ namespace ZTransport
                 }
                 
                 write_thread.Abort();
-                // make sure to wait until the thread finishes aborting
+                ping_thread.Abort();
+                // make sure to wait until the threads finishes aborting
                 write_thread.Join();
+                ping_thread.Join();
                 // be tidy
                 write_thread = null;
+                ping_thread = null;
                 client.Close();
                 lock (this) {
                     client = null;

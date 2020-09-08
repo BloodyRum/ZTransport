@@ -25,21 +25,26 @@ namespace ZTransport {
 
 
         [Serialize]
-        public string address;
+        public string address = null;
 
         [Serialize]
-        public ushort port;
+        public ushort port = Z.DEFAULT_PORT;
+
+        [Serialize]
+        public int ping_interval = Z.DEFAULT_PING_INTERVAL;
 
         [System.Runtime.Serialization.OnSerializing]
         private void OnSerializing() { // Are you happy now?
             address = Z.address;
             port = Z.port;
+            ping_interval = Z.ping_interval;
         }
 
         [System.Runtime.Serialization.OnDeserialized]
         private void OnDeserialized() {
             Z.address = address;
             Z.port = port;
+            Z.ping_interval = ping_interval;
             Z.net.connect(Z.address, Z.port);
         }
     }

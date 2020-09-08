@@ -28,6 +28,8 @@ namespace ZTransport {
         private static string address;
         private static ushort port;
 
+        private static int ping_interval;
+
         private void RefreshUserMenu(object data = null) {
             KIconButtonMenu.ButtonInfo info;
             info = new KIconButtonMenu
@@ -50,31 +52,32 @@ namespace ZTransport {
         private void PressItBaby() {
             address = Z.address;
             port = Z.port;
+            ping_interval = Z.ping_interval;
 
             var dialog = new PDialog("ZTransportOptions") {
                 Title = "ZTransport Options",
                 Size = new Vector2(320f, 200f),
                 DialogBackColor = PUITuning.Colors.OptionsBackground,
                 DialogClosed = OnDialogClosed,
-                MaxSize = new Vector2(320f, 200f),
+                MaxSize = new Vector2(320f, 400f),
             };
             dialog
                 .AddButton("ok", STRINGS.UI.CONFIRMDIALOG.OK,
-                           "Apply changes immediately.", // TODO: LocString
+                           STRINGS.ZTRANSPORT.UI.OK_TOOLTIP,
                            PUITuning.Colors.ButtonPinkStyle)
                 .AddButton(PDialog.DIALOG_KEY_CLOSE,
                            STRINGS.UI.CONFIRMDIALOG.CANCEL,
                            PUIStrings.TOOLTIP_CANCEL,
                            PUITuning.Colors.ButtonBlueStyle);
             var body = dialog.Body;
-            var panel = new PPanel("ServerAddressAndPortPanel") {
+            var panel = new PPanel("ConnectionSettings") {
                 Direction = PanelDirection.Vertical,
                 Alignment = TextAnchor.UpperLeft,
                 FlexSize = Vector2.right,
             };
             panel.AddChild(new PLabel("ServerAddressLabel") {
                     TextAlignment = TextAnchor.UpperLeft,
-                    Text = "Server Address", // TODO: LocString
+                    Text = STRINGS.ZTRANSPORT.UI.SERVER_ADDRESS,
                     FlexSize = Vector2.right,
                     Margin = new RectOffset(0, 10, 0, 10),
                 });
@@ -82,13 +85,12 @@ namespace ZTransport {
                     Text = Z.address,
                     TextStyle = PUITuning.Fonts.TextDarkStyle,
                     FlexSize = Vector2.right,
-                    ToolTip = "Address of onizd server. Leave empty to "
-                    +"disable ZTransport on this world.", //TODO: LocString
+                    ToolTip = STRINGS.ZTRANSPORT.UI.ADDRESS_TOOLTIP,
                     OnTextChanged = ServerAddressChanged,
                 });
             panel.AddChild(new PLabel("ServerPortLabel") {
                     TextAlignment = TextAnchor.UpperLeft,
-                    Text = "Server Port", // TODO: LocString
+                    Text = STRINGS.ZTRANSPORT.UI.SERVER_PORT,
                     FlexSize = Vector2.right,
                     Margin = new RectOffset(0, 10, 0, 10),
                 });
@@ -96,10 +98,23 @@ namespace ZTransport {
                     Text = Z.port.ToString(),
                     TextStyle = PUITuning.Fonts.TextDarkStyle,
                     FlexSize = Vector2.right,
-                    ToolTip = "Port number of onizd server. Leave empty to "
-                    +"use the default port.", //TODO: LocString
+                    ToolTip = STRINGS.ZTRANSPORT.UI.PORT_TOOLTIP,
                     OnTextChanged = ServerPortChanged,
                     OnValidate = ServerPortValidate,
+                });
+            panel.AddChild(new PLabel("PingIntervalLabel") {
+                    TextAlignment = TextAnchor.UpperLeft,
+                    Text = STRINGS.ZTRANSPORT.UI.PING_INTERVAL,
+                    FlexSize = Vector2.right,
+                    Margin = new RectOffset(0, 10, 0, 10),
+                });
+            panel.AddChild(new PTextField("PingIntervalField") {
+                    Text = Z.ping_interval.ToString(),
+                    TextStyle = PUITuning.Fonts.TextDarkStyle,
+                    FlexSize = Vector2.right,
+                    ToolTip = STRINGS.ZTRANSPORT.UI.PING_TOOLTIP,
+                    OnTextChanged = PingIntervalChanged,
+                    OnValidate = PingIntervalValidate,
                 });
             body.AddChild(panel);
             var built = dialog.Build();
@@ -136,10 +151,29 @@ namespace ZTransport {
             return c;
         }
 
+        private void PingIntervalChanged(GameObject widget, string neu) {
+            if (!neu.Equals("")) {
+                ping_interval = ushort.Parse(neu);
+            } else {
+                ping_interval = Z.DEFAULT_PING_INTERVAL;
+            }
+        }
+
+        private char PingIntervalValidate(string text, int i, char c) {
+            // Interval shouldn't be longer than 2 (i.e. longer than 99 seconds
+            if(text.Length >= 2) return (char)0;
+            // Ping Intervals can't contain non-digit characters
+            else if(!(c >= '0' && c <= '9')) return (char)0;
+            return c;
+            // "I would say make it 999 seconds, but that would make the
+            // comment wrap, and that wouldn't be worth it." -SB
+        }
+
         private void OnDialogClosed(string action) {
             if(action == "ok") {
                 Z.address = address;
                 Z.port = port;
+                Z.ping_interval = ping_interval;
 
                 Z.net.connect(Z.address, Z.port);
             }
