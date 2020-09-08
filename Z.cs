@@ -24,6 +24,10 @@ namespace STRINGS {
                 public static LocString NAME = (LocString)"Coordinates: {X}, {Y}";
                 public static LocString TOOLTIP = (LocString)"This can connect with ZTransporters on other Z-levels at coordinates {X}, {Y}";
             }
+            public static class ZNOTCONNECTED {
+                public static LocString NAME = (LocString)"ZTransport: Connection Error";
+                public static LocString TOOLTIP = (LocString)"{REASON}";
+            }
         }
     }
 }
@@ -36,7 +40,11 @@ namespace ZTransport
         public static string address;
         public static ushort port = DEFAULT_PORT;
         public static StatusItem coordinates;
-        
+
+        public static StatusItemCategory serverStatus;
+
+        public static StatusItem notConnected;
+
         public static Network net;
     }
 }

@@ -19,6 +19,7 @@ using Harmony;
 using System;
 using System.Collections.Generic;
 using Database;
+using UnityEngine;
 using PeterHan.PLib;
 using PeterHan.PLib.Datafiles;
 
@@ -39,6 +40,7 @@ namespace ZTransport
         [HarmonyPatch(typeof(BuildingStatusItems), "CreateStatusItems")]
         public class CreateStatusItems {
             public static void Postfix(BuildingStatusItems __instance) {
+                // Building cords
                 Z.coordinates = new StatusItem("ZCoordinates", "ZTRANSPORT","",
                                                StatusItem.IconType.Info,
                                                NotificationType.Neutral,
@@ -52,6 +54,22 @@ namespace ZTransport
                         .Replace("{Y}", y.ToString());
                 };
                 __instance.Add(Z.coordinates);
+
+
+                // Connected status
+                Z.notConnected = new StatusItem("ZNotConnected",
+                                                "ZTRANSPORT", "",
+                                               StatusItem.IconType.Exclamation,
+                                                NotificationType.BadMinor,
+                                                false,
+                                                OverlayModes.None.ID);
+                Z.notConnected.resolveStringCallback = (str, data) => {
+                    string ererrroroor = (string)data;
+                    return str.Replace("{REASON}", ererrroroor);
+                };
+                Z.notConnected.AddNotification();
+                __instance.Add(Z.notConnected);
+
             }
         }
 
@@ -153,5 +171,23 @@ namespace ZTransport
                 Z.net.connect(Z.address, Z.port);
             }
         }
+
+        [HarmonyPatch(typeof(Telepad), "OnSpawn")]
+        public class ConfigPod {
+            public static void Postfix(Telepad __instance) {
+                __instance.gameObject.AddComponent<ZConfigButton>();
+                __instance.gameObject.AddComponent<ZConnectionStatusDisplayer>();
+            }
+        }
+
+
+        [HarmonyPatch(typeof(StatusItemCategories), MethodType.Constructor,
+                      new Type[] { typeof(ResourceSet) })]
+        public class StatusItemCategoriesPatch {
+            public static void Postfix(StatusItemCategories __instance) {
+                Z.serverStatus = new StatusItemCategory(nameof (Z.serverStatus), (ResourceSet) __instance, nameof (Z.serverStatus));
+            }
+        }
+
     }
 }

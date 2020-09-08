@@ -98,6 +98,8 @@
     <Compile Include="Network.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="ZTransporter.cs" />
+    <Compile Include="ZConfigButton.cs" />
+    <Compile Include="ZConnectionStatusDisplayer.cs" />
     <Compile Include="ZServerInfoSaver.cs" />
     <Compile Include="Z.cs" />
   </ItemGroup>

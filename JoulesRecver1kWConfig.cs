@@ -43,6 +43,7 @@ namespace ZTransport {
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
             go.AddOrGet<ZTransporter>();
+            go.AddOrGet<ZConfigButton>();
 
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddComponent<JoulesRecver>().powerDistributionOrder = 9;

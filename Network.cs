@@ -72,6 +72,7 @@ namespace ZTransport
         // access to any of the following variables must be protected by a lock
         // on "this":
         TcpClient client;
+        string connection_error;
         BlockingCollection<JObject> outgoing_messages
             = new BlockingCollection<JObject>(new ConcurrentQueue<JObject>());
         Dictionary<Point, JObject> last_request_for_tile
@@ -224,12 +225,16 @@ namespace ZTransport
             while(true) {
                 try {
                     lock(this) {
+                        connection_error = null;
                         while(address == null) Monitor.Wait(this);
                         client = new TcpClient(address, port);
                         reconnecting = false;
                     }
                 }
                 catch (SocketException e) {
+                    lock(this) {
+                        connection_error = e.Message;
+                    }
                     Debug.Log("Z-Transport: Unable to connect: " + e.Message);
                     Debug.Log("Z-Transport: Trying again in about 5 seconds.");
                     Thread.Sleep(5000);
@@ -298,14 +303,23 @@ namespace ZTransport
                 }
                 catch(ServerDiedException) {
                     Debug.Log("Z-Transport: Server connection closed.");
+                    lock(this) {
+                        connection_error = "Server connection closed";
+                    }
                 }
                 catch(IOException) {
                     if (!reconnecting) {
                         Debug.Log("Z-Transport: Server connection interrupted.");
+                        lock(this) {
+                            connection_error = "Server connection interrupted";
+                        }
                     }
                 }
                 catch(KeyNotFoundException e) {
-                    Debug.Log("Z-Transport: The server spoke wrongly: "+e);
+                    Debug.Log("Z-Transport: Protocol error: "+e);
+                    lock(this) {
+                        connection_error = "Protocol error";
+                    }
                 }
                 catch(Exception e) {
                     if(e is ThreadAbortException ||
@@ -352,6 +366,12 @@ namespace ZTransport
             new_message.Add("x", x);
             new_message.Add("y", y);
             return new_message;
+        }
+
+        public string get_connection_error() {
+            lock (this) {
+                return connection_error;
+            }
         }
     }
 }

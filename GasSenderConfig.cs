@@ -50,6 +50,7 @@ namespace ZTransport {
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
             go.AddOrGet<ZTransporter>();
+            go.AddOrGet<ZConfigButton>();
 
             go.AddOrGet<MatPacketSender>().SetConduitType(ConduitType.Gas);
             

@@ -18,17 +18,28 @@
 using UnityEngine;
 
 namespace ZTransport {
-    public class ZTransporter : KMonoBehaviour {
+    public class ZConnectionStatusDisplayer : KMonoBehaviour, ISim200ms {
 
         #pragma warning disable 649
         [MyCmpReq]
         private KSelectable selectable;
         #pragma warning restore 649
 
-        protected override void OnSpawn() {
-            base.OnSpawn();
-            selectable.SetStatusItem(Db.Get().StatusItemCategories.Main,
-                                     Z.coordinates, (object)this);
+
+        public void Sim200ms(float dt) {
+            string error = Z.net.get_connection_error();
+
+            if (error != null) {
+                Z.notConnected.AddNotification("",
+                                               Z.notConnected.GetName(error),
+                                               Z.notConnected.GetTooltip(error)
+                                               );
+                selectable.SetStatusItem(Z.serverStatus,
+                                         Z.notConnected,
+                                         error);
+            } else {
+                selectable.SetStatusItem(Z.serverStatus, null, null);
+            }
         }
     }
 }
