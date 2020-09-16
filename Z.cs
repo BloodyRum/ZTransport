@@ -18,7 +18,7 @@
 namespace STRINGS {
     public static class ZTRANSPORT {
         public static LocString SETTINGS_BUTTON = (LocString)"ZTransport";
-        public static LocString SETTINGS_TOOLTIP = (LocString)"Configure ZTransport connection settings for this world. (NOT IMPLEMENTED YET)";
+        public static LocString SETTINGS_TOOLTIP = (LocString)"Configure ZTransport connection settings for this world.";
         public static class STATUSITEMS {
             public static class ZCOORDINATES {
                 public static LocString NAME = (LocString)"Coordinates: {X}, {Y}";
