@@ -50,7 +50,7 @@ namespace ZTransport
         public static ushort port = DEFAULT_PORT;
 
         public const int DEFAULT_PING_INTERVAL = 20;
-        public static int ping_interval = DEFAULT_PING_INTERVAL;
+        public static volatile int ping_interval = DEFAULT_PING_INTERVAL;
 
         public static string address;
         public static StatusItem coordinates;

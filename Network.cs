@@ -69,6 +69,7 @@ namespace ZTransport
     public class Network {
         NetworkStream stream;
         Thread read_thread, write_thread, ping_thread;
+
         // access to any of the following variables must be protected by a lock
         // on "this":
         TcpClient client;
@@ -79,6 +80,8 @@ namespace ZTransport
             = new Dictionary<Point, JObject>();
         Dictionary<Point, JObject> last_response_for_tile
             = new Dictionary<Point, JObject>();
+        Dictionary<Point, List<string>> registered_devices
+            = new Dictionary<Point, List<string>>();
         
         bool connection_active = false;
         bool reconnecting = false;
@@ -107,7 +110,7 @@ namespace ZTransport
             }
         }
 
-        private void write_directly(JObject message) {
+        private void write_directly(NetworkStream stream, JObject message) {
             string message_as_string
                 = JsonConvert.SerializeObject(message) + "\n";
             Byte[] data
@@ -116,9 +119,10 @@ namespace ZTransport
         }
 
         public void write_thread_function() {
+            NetworkStream stream = this.stream;
             while(true) {
                 JObject next_message_to_send = outgoing_messages.Take();
-                write_directly(next_message_to_send);
+                write_directly(stream, next_message_to_send);
             }
         }
 
@@ -127,7 +131,7 @@ namespace ZTransport
             ping.Add("type", "ping");
             while(true) {
                 int ping_interval = Z.ping_interval;
-                if (ping_interval != 0) {
+                if (ping_interval > 0) {
                     Thread.Sleep(ping_interval * 1000);
                     // *1000 because sleep is expecting ms, not s
                     send_message(ping);
@@ -140,13 +144,15 @@ namespace ZTransport
         public JObject get_message_for(string type, int x, int y) {
             Point requested_tile = new Point(x, y);
             JObject response;
-            if (last_response_for_tile.TryGetValue(requested_tile,
-                                                   out response)
-                && response != null && ((string)response["type"]) == type) {
-                last_response_for_tile.Remove(requested_tile);
-                return response;
-            } else {
-                return null;
+            lock(this) {
+                if (last_response_for_tile.TryGetValue(requested_tile,
+                                                       out response)
+                    && response != null && ((string)response["type"]) == type){
+                    last_response_for_tile.Remove(requested_tile);
+                    return response;
+                } else {
+                    return null;
+                }
             }
         }   
 
@@ -234,6 +240,94 @@ namespace ZTransport
             }
         }
 
+        private void register_device(Point point, string device_id) {
+            lock(this) {
+                List<string> devices;
+                bool exists = registered_devices.TryGetValue(point, out devices);
+
+                if (!exists) {
+                    devices = new List<string>();
+                    registered_devices.Add(point, devices);
+                }
+                devices.Add(device_id);
+            }
+        }
+
+        private void unregister_device(Point point, string device_id) {
+            lock(this) {
+                List<string> devices;
+                bool exists = registered_devices.TryGetValue(point, out devices);
+
+                if (!exists) {
+                    // Attempted to unregister a device at a point where we
+                    // don't know about any registered devices.
+                    // Since unregistering a device that doesn't exist is not
+                    // an error, and a NULL list is being treated as an empty
+                    // list, we don't have to do anything. -SB
+                    return;
+                }
+
+                devices.Remove(device_id);
+
+                if (devices.Count == 0) {
+                    registered_devices.Remove(point);
+                }
+            }
+        }
+
+        private void handle_message(JObject message) {
+            switch((string)message["type"]) {
+                case "ping":
+                    JObject pong = new JObject();
+                    pong.Add("type", "pong");
+                    send_message(pong);
+                    break;
+                case "registered":
+                    register_device(new Point((int)message["x"],
+                                          (int)message["y"]),
+                                    (string)message["what"]);
+                    break;
+                case "unregistered":
+                    unregister_device(new Point((int)message["x"],
+                                            (int)message["y"]),
+                                      (string)message["what"]);
+                    break;
+                default:
+                    lock(this) {
+                        Point tile_got = Point.extract_from_message(message);
+                        if (tile_got != null) {
+                            JObject last_request;
+                            last_request_for_tile.TryGetValue(tile_got, out last_request);
+
+                            last_request_for_tile.Remove(tile_got);
+
+                            if(last_request == null) {
+                                // We didn't ask for this!
+                                Debug.Log("Z-Transport: WARNING: Got a message for a tile when we weren't expecting one for that tile?");
+                                break;
+                            } else if (!last_request["cookie"]
+                                       .Equals(message["cookie"])) {
+                                // Cookie doesn't match, this message isn't
+                                // a response to the last message sent for
+                                // this tile. Discard it.
+                                Debug.Log("Z-Transport: WARNING: Got an extra message but filtered it out because the cookie didn't match. (Harmless.)");
+                                break;
+                            }
+                            last_response_for_tile[tile_got] = message;
+                        }
+
+                        //  ___
+                        // (X-X)
+                        //   |
+                        // --+--
+                        //   |
+                        //  / \
+                    }
+                    break;
+            }
+        }
+
+
         public void read_thread_function() {
             connection_active = false;
             
@@ -262,7 +356,7 @@ namespace ZTransport
                 hello.Add("type", "hello");
                 hello.Add("proto", "oniz");
                 hello.Add("version", 0);
-                write_directly(hello);
+                write_directly(this.stream, hello);
 
                 JObject response = read_directly(sr);
                 if ((string)response["type"] == "auth_ok") {
@@ -289,43 +383,7 @@ namespace ZTransport
                     while(true) {
                         JObject message = read_directly(sr);
 
-                        if ((string)message["type"] == "ping") {
-                            JObject pong = new JObject();
-                            pong.Add("type", "pong");
-                            send_message(pong);
-                            continue;
-                        }
-
-                        lock(this) {
-                            Point tile_got = Point.extract_from_message(message);
-                            if (tile_got != null) {
-                                JObject last_request;
-                                last_request_for_tile.TryGetValue(tile_got, out last_request);
-
-                                last_request_for_tile.Remove(tile_got);
-
-                                if(last_request == null) {
-                                    // We didn't ask for this!
-                                    Debug.Log("Z-Transport: WARNING: Got a message for a tile when we weren't expecting one for that tile?");
-                                    continue;
-                                } else if (!last_request["cookie"]
-                                           .Equals(message["cookie"])) {
-                                    // Cookie doesn't match, this message isn't
-                                    // a response to the last message sent for
-                                    // this tile. Discard it.
-                                    Debug.Log("Z-Transport: WARNING: Got an extra message but filtered it out because the cookie didn't match. (Harmless.)");
-                                    continue;
-                                }
-                                last_response_for_tile[tile_got] = message;
-                            }
-
-                            //  ___
-                            // (X-X)
-                            //   |
-                            // --+--
-                            //   |
-                            //  / \
-                        }
+                        handle_message(message);
                     }
                 }
                 catch(ServerDiedException) {
