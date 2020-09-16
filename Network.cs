@@ -80,8 +80,10 @@ namespace ZTransport
             = new Dictionary<Point, JObject>();
         Dictionary<Point, JObject> last_response_for_tile
             = new Dictionary<Point, JObject>();
-        Dictionary<Point, List<string>> registered_devices
+        Dictionary<Point, List<string>> registered_remote_devices
             = new Dictionary<Point, List<string>>();
+        Dictionary<Point, string> registered_local_devices
+            = new Dictionary<Point, string>();
         
         bool connection_active = false;
         bool reconnecting = false;
@@ -240,23 +242,23 @@ namespace ZTransport
             }
         }
 
-        private void register_device(Point point, string device_id) {
+        private void register_remote_device(Point point, string device_id) {
             lock(this) {
                 List<string> devices;
-                bool exists = registered_devices.TryGetValue(point, out devices);
+                bool exists = registered_remote_devices.TryGetValue(point, out devices);
 
                 if (!exists) {
                     devices = new List<string>();
-                    registered_devices.Add(point, devices);
+                    registered_remote_devices.Add(point, devices);
                 }
                 devices.Add(device_id);
             }
         }
 
-        private void unregister_device(Point point, string device_id) {
+        private void unregister_remote_device(Point point, string device_id) {
             lock(this) {
                 List<string> devices;
-                bool exists = registered_devices.TryGetValue(point, out devices);
+                bool exists = registered_remote_devices.TryGetValue(point, out devices);
 
                 if (!exists) {
                     // Attempted to unregister a device at a point where we
@@ -270,7 +272,28 @@ namespace ZTransport
                 devices.Remove(device_id);
 
                 if (devices.Count == 0) {
-                    registered_devices.Remove(point);
+                    registered_remote_devices.Remove(point);
+                }
+            }
+        }
+
+        public void register_local_device(int x, int y, string device_id) {
+            Point location = new Point(x, y);
+            lock(this) {
+                registered_local_devices.Remove(location);
+                registered_local_devices.Add(location, device_id);
+            }
+        }
+
+        public void unregister_local_device(int x, int y, string device_id) {
+            string existing_device;
+            Point location = new Point(x, y);
+
+            lock(this) {
+                if (registered_local_devices.TryGetValue(location, out existing_device)) {
+                    if (existing_device == device_id) {
+                        registered_local_devices.Remove(location);
+                    }
                 }
             }
         }
@@ -283,12 +306,12 @@ namespace ZTransport
                     send_message(pong);
                     break;
                 case "registered":
-                    register_device(new Point((int)message["x"],
+                    register_remote_device(new Point((int)message["x"],
                                           (int)message["y"]),
                                     (string)message["what"]);
                     break;
                 case "unregistered":
-                    unregister_device(new Point((int)message["x"],
+                    unregister_remote_device(new Point((int)message["x"],
                                             (int)message["y"]),
                                       (string)message["what"]);
                     break;
