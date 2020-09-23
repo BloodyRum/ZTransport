@@ -28,9 +28,10 @@ using Newtonsoft.Json.Linq;
 namespace ZTransport
 {
     class Point : IEquatable<Point> {
-        Int32 x, y;
+        public int x { get; }
+        public int y { get; }
 
-        public Point(Int32 x, Int32 y) {
+        public Point(int x, int y) {
             this.x = x;
             this.y = y;
         }
@@ -41,8 +42,8 @@ namespace ZTransport
                 = (IDictionary<string, JToken>)message;
 
             if (dict.ContainsKey("x") && dict.ContainsKey("y")) {
-                Int32 x_value = (Int32)message["x"];
-                Int32 y_value = (Int32)message["y"];
+                int x_value = (int)message["x"];
+                int y_value = (int)message["y"];
                 return new Point(x_value, y_value);
             }
             else return null;
@@ -162,9 +163,10 @@ namespace ZTransport
             lock(this) {
                 Point target_point = Point.extract_from_message(message);
                 if (connection_active) {
-                    if(target_point != null) {
+                    if(target_point != null && (string)message["type"] != "register" && (string)message["type"] != "unregister") {
                         // We only need a cookie if:
                         // - The message "belongs to" a particular point
+                        //   AND is not a registration message
                         // AND
                         // - The message is going to be sent over the network
                         //   (i.e. the server isn't dead)
@@ -236,7 +238,6 @@ namespace ZTransport
                     // recieved from the packet to be null
 
                     return fake_returned;
-
                 default:
                     throw new Exception("GENERATE MISSING: WAS PASSED AN UNKNOWN MESSAGE TYPE");
             }
@@ -279,9 +280,19 @@ namespace ZTransport
 
         public void register_local_device(int x, int y, string device_id) {
             Point location = new Point(x, y);
+
+            JObject register_message = new JObject();
+            register_message.Add("type", "register");
+            register_message.Add("x", x);
+            register_message.Add("y", y);
+            register_message.Add("what", device_id);
+
             lock(this) {
                 registered_local_devices.Remove(location);
                 registered_local_devices.Add(location, device_id);
+                if (connection_active) {
+                    send_message(register_message);
+                }
             }
         }
 
@@ -289,11 +300,33 @@ namespace ZTransport
             string existing_device;
             Point location = new Point(x, y);
 
+            JObject unregister_message = new JObject();
+            unregister_message.Add("type", "unregister");
+            unregister_message.Add("x", x);
+            unregister_message.Add("y", y);
+            unregister_message.Add("what", device_id);
+
             lock(this) {
                 if (registered_local_devices.TryGetValue(location, out existing_device)) {
                     if (existing_device == device_id) {
                         registered_local_devices.Remove(location);
                     }
+                }
+                if (connection_active) {
+                    send_message(unregister_message);
+                }
+            }
+        }
+
+        private void send_registered_list() {
+            lock(this) {
+                foreach(KeyValuePair<Point,string> entry in registered_local_devices) {
+                    JObject register_message = new JObject();
+                    register_message.Add("type", "register");
+                    register_message.Add("x", entry.Key.x);
+                    register_message.Add("y", entry.Key.y);
+                    register_message.Add("what", entry.Value);
+                    send_message(register_message);
                 }
             }
         }
@@ -350,7 +383,6 @@ namespace ZTransport
             }
         }
 
-
         public void read_thread_function() {
             connection_active = false;
             
@@ -391,9 +423,15 @@ namespace ZTransport
                 }
 
                 lock(this) {
+                    // When we reconnect, we need to (re)send the
+                    // list of registered devices, the server
+                    // automatically discards registered devices from
+                    // a disconnected client
+                    send_registered_list();
+
                     connection_active = true;
                 }
-                
+
                 write_thread = new Thread(new ThreadStart(() => write_thread_function()));
                 write_thread.IsBackground = true;
                 write_thread.Start();

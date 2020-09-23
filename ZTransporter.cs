@@ -25,10 +25,33 @@ namespace ZTransport {
         private KSelectable selectable;
         #pragma warning restore 649
 
+        [SerializeField]
+        string local_id;
+        [SerializeField]
+        string expected_id;
+
+        int x, y;
+
         protected override void OnSpawn() {
             base.OnSpawn();
             selectable.SetStatusItem(Db.Get().StatusItemCategories.Main,
                                      Z.coordinates, (object)this);
+
+            Grid.CellToXY(Grid.PosToCell(this), out x, out y);
+
+            Z.net.register_local_device(x, y, local_id);
+        }
+
+        protected override void OnCleanUp() {
+            base.OnCleanUp();
+
+            Z.net.unregister_local_device(x, y, local_id);
+        }
+
+        public void SetLocalAndExpectedID(string local_id,
+                                          string expected_id) {
+            this.local_id = local_id;
+            this.expected_id = expected_id;
         }
     }
 }

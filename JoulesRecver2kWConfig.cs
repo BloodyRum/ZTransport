@@ -42,7 +42,8 @@ namespace ZTransport {
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
-            go.AddOrGet<ZTransporter>();
+            go.AddOrGet<ZTransporter>().SetLocalAndExpectedID("JoulesRecver",
+                                                              "JoulesSender");
             go.AddOrGet<ZConfigButton>();
 
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
