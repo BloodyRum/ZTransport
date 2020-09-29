@@ -46,6 +46,8 @@ namespace ZTransport {
                                                               "LiquidSender");
             go.AddOrGet<ZConfigButton>();
 
+            go.AddOrGet<OperationalGlueShimThing>();
+
             MatPacketRecver matpacketrecver = go.AddOrGet<MatPacketRecver>();
             matpacketrecver.conduitType = ConduitType.Liquid;
         }

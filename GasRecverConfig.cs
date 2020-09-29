@@ -47,6 +47,8 @@ namespace ZTransport {
                                                               "GasSender");
             go.AddOrGet<ZConfigButton>();
 
+            go.AddOrGet<OperationalGlueShimThing>();
+
             MatPacketRecver matpacketrecver = go.AddOrGet<MatPacketRecver>();
             matpacketrecver.conduitType = ConduitType.Gas;
         }

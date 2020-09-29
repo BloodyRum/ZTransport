@@ -18,12 +18,16 @@
 using UnityEngine;
 
 namespace ZTransport {
-    public class ZTransporter : KMonoBehaviour {
+    public class ZTransporter : KMonoBehaviour, ISim1000ms {
 
         #pragma warning disable 649
         [MyCmpReq]
         private KSelectable selectable;
+        [MyCmpGet]
+        private Operational operational;
         #pragma warning restore 649
+
+        private static Operational.Flag remote_connected = new Operational.Flag("remote_connected", Operational.Flag.Type.Requirement);
 
         [SerializeField]
         string local_id;
@@ -31,6 +35,11 @@ namespace ZTransport {
         string expected_id;
 
         int x, y;
+
+        public void Sim1000ms(float dt) {
+            this.operational.SetFlag(remote_connected,
+                                     should_be_operational());
+        }
 
         protected override void OnSpawn() {
             base.OnSpawn();
@@ -53,5 +62,12 @@ namespace ZTransport {
             this.local_id = local_id;
             this.expected_id = expected_id;
         }
+
+        private bool should_be_operational() {
+            return Z.net.remote_device_exists(x, y, expected_id);
+        }
     }
 }
+
+
+// Senders always operational, recvers not

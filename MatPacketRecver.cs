@@ -29,8 +29,6 @@ namespace ZTransport {
     public class MatPacketRecver : KMonoBehaviour, ISaveLoadable
     {
         private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
-        [SerializeField]
-        public bool isOn = true;
         private int utilityCell = -1;
         [SerializeField]
         public ConduitType conduitType;
@@ -38,8 +36,6 @@ namespace ZTransport {
         public SimHashes[] elementFilter;
         [SerializeField]
         public bool invertElementFilter;
-        [SerializeField]
-        public bool alwaysDispense;
         [SerializeField]
         public bool blocked;
         [MyCmpReq]
@@ -107,24 +103,15 @@ namespace ZTransport {
             base.OnCleanUp();
         }
 
-        public void SetOnState(bool onState)
-        {
-            this.isOn = onState;
-        }
-
         private void ConduitUpdate(float dt)
         {
             this.operational.SetFlag(MatPacketRecver.outputConduitFlag, this.IsConnected);
             this.blocked = false;
-            if (!this.isOn)
-                return;
             this.Dispense(dt);
         }
 
         private void Dispense(float dt)
         {
-            if (!this.operational.IsOperational && !this.alwaysDispense)
-                return;
             PrimaryElement suitableElement = this.FindSuitableElement();
             if (!((UnityEngine.Object) suitableElement != (UnityEngine.Object) null))
                 return;
@@ -206,7 +193,8 @@ namespace ZTransport {
             get
             {
                 GameObject gameObject = Grid.Objects[this.utilityCell, this.conduitType == ConduitType.Gas ? 12 : 16];
-                return (UnityEngine.Object) gameObject != (UnityEngine.Object) null && (UnityEngine.Object) gameObject.GetComponent<BuildingComplete>() != (UnityEngine.Object) null;
+                return gameObject != null
+                    && gameObject.GetComponent<BuildingComplete>() != null;
             }
         }
     }

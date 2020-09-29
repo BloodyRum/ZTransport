@@ -46,6 +46,8 @@ namespace ZTransport {
                                                               "JoulesRecver");
             go.AddOrGet<ZConfigButton>();
 
+            go.AddOrGet<OperationalGlueShimThing>();
+
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddComponent<RequireInputs>();
             Battery battery = go.AddOrGet<Battery>();

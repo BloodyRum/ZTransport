@@ -26,13 +26,26 @@ namespace ZTransport {
 
     [SerializationConfig(KSerialization.MemberSerialization.OptIn)]
     [AddComponentMenu("KMonoBehaviour/scripts/MatPacketSender")]
-    public class MatPacketSender : KMonoBehaviour, ISaveLoadable, ISim1000ms
+    public class MatPacketSender : KMonoBehaviour, ISaveLoadable
     {
+        private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
+
         [MyCmpReq]
         public Storage storage;
 
         [SerializeField]
+        public bool isOn = true;
+
+#pragma warning disable 0649
+        [MyCmpReq]
+        private Operational operational;
+#pragma warning restore 0649
+
+        [SerializeField]
         public ConduitType conduitType;
+
+        private HandleVector<int>.Handle partitionerEntry;
+        private int utilityCell = -1;
 
         private int elementOutputOffset = 0;
 
@@ -57,7 +70,12 @@ namespace ZTransport {
         {
             this.conduitType = type;
         }
-        
+
+        private void OnConduitConnectionChanged(object data)
+        {
+            this.Trigger(-2094018600, (object) this.IsConnected);
+        }
+
         private JObject convert_from_primary(PrimaryElement pri_element) {
             JObject chunk = new JObject();
             JObject disease_chunk = new JObject();
@@ -80,11 +98,38 @@ namespace ZTransport {
             }
             return chunk;
         }
-        
+
+        protected override void OnSpawn()
+        {
+            base.OnSpawn();
+            GameScheduler.Instance.Schedule("PlumbingTutorial", 2f, (System.Action<object>) (obj => Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, true)), (object) null, (SchedulerGroup) null);
+            this.utilityCell = this.GetComponent<Building>().GetUtilityOutputCell();
+            this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", (object) this.gameObject, this.utilityCell, GameScenePartitioner.Instance.objectLayers[this.conduitType == ConduitType.Gas ? 12 : 16], new System.Action<object>(this.OnConduitConnectionChanged));
+            this.GetConduitManager().AddConduitUpdater(new System.Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
+            this.OnConduitConnectionChanged((object) null);
+        }
+
+        protected override void OnCleanUp()
+        {
+            this.GetConduitManager().RemoveConduitUpdater(new System.Action<float>(this.ConduitUpdate));
+            GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+            base.OnCleanUp();
+        }
+
+
         JObject buffered = null;
         bool outstanding = false;
 
-        public void Sim1000ms(float dt)
+        private void ConduitUpdate(float dt)
+        {
+            this.operational.SetFlag(MatPacketSender.outputConduitFlag, this.IsConnected);
+            if (!this.isOn)
+                return;
+            this.Dispense(dt);
+        }
+
+
+        public void Dispense(float dt)
         {
             // Because of how complex materials, we are NOT going to only
             // use the internal buffer of the tank/whatever.
@@ -139,6 +184,30 @@ namespace ZTransport {
                 }
             }
         }
+
+        public ConduitFlow GetConduitManager()
+        {
+            switch (this.conduitType)
+            {
+                case ConduitType.Gas:
+                    return Game.Instance.gasConduitFlow;
+                case ConduitType.Liquid:
+                    return Game.Instance.liquidConduitFlow;
+                default:
+                    return (ConduitFlow) null;
+            }
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                GameObject gameObject = Grid.Objects[this.utilityCell, this.conduitType == ConduitType.Gas ? 12 : 16];
+                return gameObject != null
+                    && gameObject.GetComponent<BuildingComplete>() != null;
+            }
+        }
+
 
         private PrimaryElement FindSuitableElement()
         {

@@ -157,13 +157,15 @@ namespace ZTransport
                     return null;
                 }
             }
-        }   
+        }
 
         public void send_message(JObject message) {
+            Point target_point = Point.extract_from_message(message);
+            bool needs_response = target_point != null && (string)message["type"] != "register" && (string)message["type"] != "unregister";
+
             lock(this) {
-                Point target_point = Point.extract_from_message(message);
                 if (connection_active) {
-                    if(target_point != null && (string)message["type"] != "register" && (string)message["type"] != "unregister") {
+                    if(needs_response) {
                         // We only need a cookie if:
                         // - The message "belongs to" a particular point
                         //   AND is not a registration message
@@ -178,7 +180,9 @@ namespace ZTransport
                     }
                     outgoing_messages.Add(message);
                 } else {
-                    last_response_for_tile[target_point] = generate_missing_response(message);
+                    if (needs_response) {
+                        last_response_for_tile[target_point] = generate_missing_response(message);
+                    }
                 }
             }
         }
@@ -275,6 +279,25 @@ namespace ZTransport
                 if (devices.Count == 0) {
                     registered_remote_devices.Remove(point);
                 }
+            }
+        }
+
+        public bool remote_device_exists(int x, int y, string expected_id) {
+
+            Point point = new Point(x, y);
+
+            lock(this) {
+                List<string> devices;
+                bool exists = registered_remote_devices.TryGetValue(point, out devices);
+                if (!exists) {
+                    return false;
+                }
+
+                foreach (string device_id in devices) {
+                    if (device_id == expected_id) { return true; }
+                }
+
+                return false;
             }
         }
 
@@ -423,13 +446,20 @@ namespace ZTransport
                 }
 
                 lock(this) {
+                    connection_active = true;
+
+                    // make sure we don't have any stale messages hanging
+                    // around -SB
+                    while(outgoing_messages.Count > 0) {
+                        JObject v;
+                        outgoing_messages.TryTake(out v);
+                    }
+
                     // When we reconnect, we need to (re)send the
                     // list of registered devices, the server
                     // automatically discards registered devices from
                     // a disconnected client
                     send_registered_list();
-
-                    connection_active = true;
                 }
 
                 write_thread = new Thread(new ThreadStart(() => write_thread_function()));
