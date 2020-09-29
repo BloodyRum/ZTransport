@@ -67,6 +67,9 @@
     <Reference Include="UnityEngine">
       <HintPath>lib\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>lib\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>lib\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -81,28 +84,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="GasRecverConfig.cs" />
-    <Compile Include="GasSenderConfig.cs" />
-    <Compile Include="JoulesRecver.cs" />
-    <Compile Include="JoulesRecver1kWConfig.cs" />
-    <Compile Include="JoulesRecver20kWConfig.cs" />
-    <Compile Include="JoulesRecver2kWConfig.cs" />
-    <Compile Include="JoulesRecver50kWConfig.cs" />
-    <Compile Include="JoulesSender.cs" />
-    <Compile Include="JoulesSenderConfig.cs" />
-    <Compile Include="LiquidRecverConfig.cs" />
-    <Compile Include="LiquidSenderConfig.cs" />
-    <Compile Include="MatPacketRecver.cs" />
-    <Compile Include="MatPacketSender.cs" />
-    <Compile Include="Network.cs" />
-    <Compile Include="Patches.cs" />
-    <Compile Include="ZTransporter.cs" />
-    <Compile Include="ZConfigButton.cs" />
-    <Compile Include="ZConnectionStatusDisplayer.cs" />
-    <Compile Include="ZServerInfoSaver.cs" />
-    <Compile Include="Z.cs" />
-    <Compile Include="OperationalGlueShimThing.cs" />
+    <Compile Include="src\AssemblyInfo.cs" />
+    <Compile Include="src\GasRecverConfig.cs" />
+    <Compile Include="src\GasSenderConfig.cs" />
+    <Compile Include="src\JoulesRecver.cs" />
+    <Compile Include="src\JoulesRecver1kWConfig.cs" />
+    <Compile Include="src\JoulesRecver20kWConfig.cs" />
+    <Compile Include="src\JoulesRecver2kWConfig.cs" />
+    <Compile Include="src\JoulesRecver50kWConfig.cs" />
+    <Compile Include="src\JoulesSender.cs" />
+    <Compile Include="src\JoulesSenderConfig.cs" />
+    <Compile Include="src\LiquidRecverConfig.cs" />
+    <Compile Include="src\LiquidSenderConfig.cs" />
+    <Compile Include="src\MatPacketRecver.cs" />
+    <Compile Include="src\MatPacketSender.cs" />
+    <Compile Include="src\Network.cs" />
+    <Compile Include="src\Patches.cs" />
+    <Compile Include="src\ZTransporter.cs" />
+    <Compile Include="src\ZConfigButton.cs" />
+    <Compile Include="src\ZConnectionStatusDisplayer.cs" />
+    <Compile Include="src\ZServerInfoSaver.cs" />
+    <Compile Include="src\Z.cs" />
+    <Compile Include="src\OperationalGlueShimThing.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
