@@ -147,6 +147,28 @@ namespace ZTransport
             }
         }
 
+        [HarmonyPatch(typeof(BuildToolHoverTextCard), "DrawInstructions")]
+        public class BuildToolHoverTextCardPath {
+            public static void Postfix(BuildToolHoverTextCard __instance,
+                                       HoverTextDrawer drawer) {
+                if(__instance.currentDef == null) return;
+
+                ZTransporter possible_ztransport = __instance.currentDef.BuildingComplete.GetComponent<ZTransporter>();
+                if (possible_ztransport != null) {
+                    drawer.NewLine(26);  // All the cool kids are doing it -SB
+                    drawer.AddIndent(8); // I LEARNED IT FROM WATCHING [Klei] -SB
+                    int x, y;
+
+                    var pos = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
+                    Grid.CellToXY(pos, out x, out y);
+
+                    var coords_string = STRINGS.ZTRANSPORT.STATUSITEMS.ZCOORDINATES.NAME.Replace("{X}", x.ToString()).Replace("{Y}", y.ToString());
+                    drawer.DrawText(coords_string,
+                                    __instance.Styles_Instruction.Standard);
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(SaveGame), "OnPrefabInit")]
         public class SaveGameComponentPatch {
             public static void Postfix(SaveGame __instance) {
