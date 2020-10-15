@@ -152,6 +152,7 @@ namespace ZTransport
             public static void Postfix(BuildToolHoverTextCard __instance,
                                        HoverTextDrawer drawer) {
                 if(__instance.currentDef == null) return;
+                if(__instance.currentDef.BuildingComplete == null) return;
 
                 ZTransporter possible_ztransport = __instance.currentDef.BuildingComplete.GetComponent<ZTransporter>();
                 if (possible_ztransport != null) {
