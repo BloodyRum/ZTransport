@@ -30,7 +30,7 @@ namespace STRINGS {
             }
         }
         public static class UI {
-            public static LocString ASDFASDFASDF = (LocString)"asdf";
+            public static LocString ASDFASDFASDF = (LocString)"--TEXT--";
             public static LocString OK_TOOLTIP = (LocString)"Apply changes immediately.";
             public static LocString SERVER_ADDRESS = (LocString)"Server Address";
             public static LocString ADDRESS_TOOLTIP = (LocString)"Address of onizd server. Leave empty to disable ZTransport on this world.";
