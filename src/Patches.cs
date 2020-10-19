@@ -147,25 +147,31 @@ namespace ZTransport
             }
         }
 
-        [HarmonyPatch(typeof(BuildToolHoverTextCard), "DrawInstructions")]
-        public class BuildToolHoverTextCardPath {
-            public static void Postfix(BuildToolHoverTextCard __instance,
+        [HarmonyPatch(typeof(HoverTextConfiguration), "DrawInstructions")]
+        public class HoverTextConfigurationPatch {
+            public static void Postfix(HoverTextConfiguration __instance,
                                        HoverTextDrawer drawer) {
-                if(__instance.currentDef == null) return;
-                if(__instance.currentDef.BuildingComplete == null) return;
+                if(__instance == null) return;
+                if(!(__instance is BuildToolHoverTextCard)) return;
+                BuildToolHoverTextCard hover_text_card
+                    = (BuildToolHoverTextCard) __instance;
+                if(hover_text_card.currentDef == null) return;
+                if(hover_text_card.currentDef.BuildingComplete == null) return;
 
-                ZTransporter possible_ztransport = __instance.currentDef.BuildingComplete.GetComponent<ZTransporter>();
+                ZTransporter possible_ztransport = hover_text_card.currentDef.BuildingComplete.GetComponent<ZTransporter>();
                 if (possible_ztransport != null) {
                     drawer.NewLine(26);  // All the cool kids are doing it -SB
                     drawer.AddIndent(8); // I LEARNED IT FROM WATCHING [Klei] -SB
                     int x, y;
 
-                    var pos = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
-                    Grid.CellToXY(pos, out x, out y);
+                    var pos = KInputManager.GetMousePos();
+                    var point = Camera.main.ScreenToWorldPoint(pos);
+                    var cell = Grid.PosToCell(point);
+                    Grid.CellToXY(cell, out x, out y);
 
                     var coords_string = STRINGS.ZTRANSPORT.STATUSITEMS.ZCOORDINATES.NAME.Replace("{X}", x.ToString()).Replace("{Y}", y.ToString());
                     drawer.DrawText(coords_string,
-                                    __instance.Styles_Instruction.Standard);
+                                  hover_text_card.Styles_Instruction.Standard);
                 }
             }
         }
