@@ -243,7 +243,7 @@ namespace ZTransport
 
                     return fake_returned;
                 default:
-                    throw new Exception("GENERATE MISSING: WAS PASSED AN UNKNOWN MESSAGE TYPE");
+                    throw new Exception(STRINGS.ZTRANSPORT.NETWORK.GENERATE_MISSING_PASSED_UNKNOWN);
             }
         }
 
@@ -382,14 +382,14 @@ namespace ZTransport
 
                             if(last_request == null) {
                                 // We didn't ask for this!
-                                Debug.Log("Z-Transport: WARNING: Got a message for a tile when we weren't expecting one for that tile?");
+                                Debug.Log(STRINGS.ZTRANSPORT.NETWORK.DEBUG_UNEXPECTED_TILE);
                                 break;
                             } else if (!last_request["cookie"]
                                        .Equals(message["cookie"])) {
                                 // Cookie doesn't match, this message isn't
                                 // a response to the last message sent for
                                 // this tile. Discard it.
-                                Debug.Log("Z-Transport: WARNING: Got an extra message but filtered it out because the cookie didn't match. (Harmless.)");
+                                Debug.Log(STRINGS.ZTRANSPORT.NETWORK.DEBUG_COOKIE_MISMATCH);
                                 break;
                             }
                             last_response_for_tile[tile_got] = message;
@@ -403,6 +403,13 @@ namespace ZTransport
                         //  / \
                     }
                     break;
+            }
+        }
+
+        private void raise_connection_error(String error) {
+            Debug.Log(STRINGS.ZTRANSPORT.NETWORK.CONNECTION_ERROR.Replace("{ERROR}", error));
+            lock(this) {
+                connection_error = error;
             }
         }
 
@@ -422,55 +429,61 @@ namespace ZTransport
                     lock(this) {
                         connection_error = e.Message;
                     }
-                    Debug.Log("Z-Transport: Unable to connect: " + e.Message);
-                    Debug.Log("Z-Transport: Trying again in about 5 seconds.");
+                    Debug.Log(STRINGS.ZTRANSPORT.NETWORK.UNABLE_TO_CONNECT.Replace("{REASON}", e.Message));
+                    Debug.Log(STRINGS.ZTRANSPORT.NETWORK.RETRY_CONNECTION);
                     Thread.Sleep(5000);
                     continue;
                 }
                 stream = client.GetStream();
                 StreamReader sr = new StreamReader(stream);
 
-                JObject hello = new JObject();
-                hello.Add("type", "hello");
-                hello.Add("proto", "oniz");
-                hello.Add("version", 0);
-                write_directly(this.stream, hello);
+                try {
+                    JObject hello = new JObject();
+                    hello.Add("type", "hello");
+                    hello.Add("proto", "oniz");
+                    hello.Add("version", 0);
+                    write_directly(this.stream, hello);
 
-                JObject response = read_directly(sr);
-                if ((string)response["type"] == "auth_ok") {
-                    // No need to authenticate. We're all fine, here, now.
-                } else if ((string)response["type"] == "need_auth") {
-                    throw new Exception("NIY: authentication");
-                } else {
-                    throw new Exception("BAD SERVER AUTH MESSAGE: " + JsonConvert.SerializeObject(response));
-                }
+                    JObject response = read_directly(sr);
+                    if ((string)response["type"] == "auth_ok") {
+                        // All set
+                    } else {
+                        raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.BAD_HANDSHAKE);
+                        Debug.Log(JsonConvert.SerializeObject(response));
 
-                lock(this) {
-                    connection_active = true;
-
-                    // make sure we don't have any stale messages hanging
-                    // around -SB
-                    while(outgoing_messages.Count > 0) {
-                        JObject v;
-                        outgoing_messages.TryTake(out v);
+                        client.Close();
+                        lock (this) {
+                            client = null;
+                        }
+                        Thread.Sleep(5000);
+                        continue;
                     }
 
-                    // When we reconnect, we need to (re)send the
-                    // list of registered devices, the server
-                    // automatically discards registered devices from
-                    // a disconnected client
-                    send_registered_list();
-                }
+                    lock(this) {
+                        connection_active = true;
 
-                write_thread = new Thread(new ThreadStart(() => write_thread_function()));
-                write_thread.IsBackground = true;
-                write_thread.Start();
+                        // make sure we don't have any stale messages hanging
+                        // around -SB
+                        while(outgoing_messages.Count > 0) {
+                            JObject v;
+                            outgoing_messages.TryTake(out v);
+                        }
 
-                ping_thread = new Thread(new ThreadStart(() => ping_thread_function()));
-                ping_thread.IsBackground = true;
-                ping_thread.Start();
+                        // When we reconnect, we need to (re)send the
+                        // list of registered devices, the server
+                        // automatically discards registered devices from
+                        // a disconnected client
+                        send_registered_list();
+                    }
 
-                try {
+                    write_thread = new Thread(new ThreadStart(() => write_thread_function()));
+                    write_thread.IsBackground = true;
+                    write_thread.Start();
+
+                    ping_thread = new Thread(new ThreadStart(() => ping_thread_function()));
+                    ping_thread.IsBackground = true;
+                    ping_thread.Start();
+
                     while(true) {
                         JObject message = read_directly(sr);
 
@@ -478,24 +491,21 @@ namespace ZTransport
                     }
                 }
                 catch(ServerDiedException) {
-                    Debug.Log("Z-Transport: Server connection closed.");
-                    lock(this) {
-                        connection_error = "Server connection closed";
-                    }
+                    raise_connection_error(
+                       STRINGS.ZTRANSPORT.NETWORK.SERVER_CLOSED_CONNECTION);
                 }
                 catch(IOException) {
                     if (!reconnecting) {
-                        Debug.Log("Z-Transport: Server connection interrupted.");
-                        lock(this) {
-                            connection_error = "Server connection interrupted";
-                        }
+                        raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.SERVER_CONNECTION_INTERRUPTED);
                     }
                 }
                 catch(KeyNotFoundException e) {
-                    Debug.Log("Z-Transport: Protocol error: "+e);
-                    lock(this) {
-                        connection_error = "Protocol error";
-                    }
+                    raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.PROTOCOL_ERROR);
+                    Debug.Log(e);
+                }
+                catch (JsonReaderException e) {
+                    raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.CORRUPTED_MESSAGE);
+                    Debug.Log(e);
                 }
                 catch(Exception e) {
                     if(e is ThreadAbortException ||
@@ -521,13 +531,18 @@ namespace ZTransport
                     }
                     last_request_for_tile.Clear();
                 }
+
+                // Make sure threads are stopped before resetting connection
+                if(write_thread != null) {
+                    write_thread.Abort();
+                    write_thread.Join();
+                }
+
+                if(ping_thread != null) {
+                    ping_thread.Abort();
+                    ping_thread.Join();
+                }
                 
-                write_thread.Abort();
-                ping_thread.Abort();
-                // make sure to wait until the threads finishes aborting
-                write_thread.Join();
-                ping_thread.Join();
-                // be tidy
                 write_thread = null;
                 ping_thread = null;
                 client.Close();

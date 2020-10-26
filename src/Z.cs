@@ -29,6 +29,19 @@ namespace STRINGS {
                 public static LocString TOOLTIP = (LocString)"{REASON}";
             }
         }
+        public static class NETWORK {
+            public static LocString GENERATE_MISSING_PASSED_UNKNOWN = (LocString)"GENERATE MISSING: WAS PASSED AN UNKNOWN MESSAGE TYPE";
+            public static LocString DEBUG_UNEXPECTED_TILE = (LocString)"Z-Transport: WARNING: Got a message for a tile when we weren't expecting one for that tile?";
+            public static LocString DEBUG_COOKIE_MISMATCH = (LocString)"Z-Transport: WARNING: Got an extra message but filtered it out because the cookie didn't match. (Harmless.)";
+            public static LocString UNABLE_TO_CONNECT = (LocString)"Z-Transport: Unable to connect: {REASON}";
+            public static LocString RETRY_CONNECTION = (LocString)"Z-Transport: Trying again in about 5 seconds.";
+            public static LocString BAD_HANDSHAKE = (LocString)"Bad handshake message";
+            public static LocString CORRUPTED_MESSAGE = (LocString)"Server sent a corrupted message";
+            public static LocString CONNECTION_ERROR = (LocString)"Z-Transport: Connection error: {ERROR}";
+            public static LocString SERVER_CLOSED_CONNECTION = (LocString)"Server closed connection";
+            public static LocString SERVER_CONNECTION_INTERRUPTED = (LocString)"Server connection interrupted";
+            public static LocString PROTOCOL_ERROR = (LocString)"Protocol Error";
+        }
         public static class UI {
             public static LocString ASDFASDFASDF = (LocString)"--TEXT--";
             public static LocString OK_TOOLTIP = (LocString)"Apply changes immediately.";
