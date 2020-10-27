@@ -441,22 +441,48 @@ namespace ZTransport
                     JObject hello = new JObject();
                     hello.Add("type", "hello");
                     hello.Add("proto", "oniz");
-                    hello.Add("version", 0);
+                    hello.Add("version", 1);
                     write_directly(this.stream, hello);
 
                     JObject response = read_directly(sr);
+
+                    // The old server, version 0, had an undocumented response
+                    // called "bad_version", which it sent out if the clients
+                    // version didnt match up with the list the server could
+                    // support. We are going to use another system, but the
+                    // server is already out there in the wild, and we need
+                    // this code to remain backwards compatible with the inital
+                    // server
+                    if ((string)response["type"] == "bad_version") {
+                        response["type"] = "handshake_error";
+                        response.Add("what", "version_too_new");
+                    }
+
                     if ((string)response["type"] == "auth_ok") {
                         // All set
+                    } else if ((string)response["type"] == "handshake_error") {
+                        switch ((string)response["what"]) {
+                            case "unknown_protocol":
+                                raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.NOT_ZTRANSPORT_SERVER);
+                                break;
+                            case "version_too_old":
+                                raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.UPDATE_CLIENT);
+                                break;
+                            case "version_too_new":
+                                raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.UPDATE_SERVER);
+                                break;
+                            case "bad_version":
+                            case "compression_type_unknown":
+                            default:
+                                raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.BAD_HANDSHAKE);
+                                break;
+                        }
+                        goto cleanup_connection;
                     } else {
                         raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.BAD_HANDSHAKE);
                         Debug.Log(JsonConvert.SerializeObject(response));
 
-                        client.Close();
-                        lock (this) {
-                            client = null;
-                        }
-                        Thread.Sleep(5000);
-                        continue;
+                        goto cleanup_connection;
                     }
 
                     lock(this) {
@@ -519,6 +545,7 @@ namespace ZTransport
                         throw;
                     }
                 }
+            cleanup_connection:
                 // If we got here, it's because the server connection was lost
                 // for some reason.
                 lock(this) {

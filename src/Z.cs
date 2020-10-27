@@ -41,6 +41,9 @@ namespace STRINGS {
             public static LocString SERVER_CLOSED_CONNECTION = (LocString)"Server closed connection";
             public static LocString SERVER_CONNECTION_INTERRUPTED = (LocString)"Server connection interrupted";
             public static LocString PROTOCOL_ERROR = (LocString)"Protocol Error";
+            public static LocString NOT_ZTRANSPORT_SERVER = (LocString)"The requested server is not a ZTransport server";
+            public static LocString UPDATE_CLIENT = (LocString)"You need to update ZTransport.";
+            public static LocString UPDATE_SERVER = (LocString)"The server you are trying to connect too needs to be updated.";
         }
         public static class UI {
             public static LocString ASDFASDFASDF = (LocString)"--TEXT--";
