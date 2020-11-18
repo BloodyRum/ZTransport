@@ -28,6 +28,11 @@ namespace STRINGS {
                 public static LocString NAME = (LocString)"ZTransport: Connection Error";
                 public static LocString TOOLTIP = (LocString)"{REASON}";
             }
+
+            public static class ZDROPBOXSTATUS {
+                public static LocString NAME = (LocString)"Sending objects: {COUNT}";
+                public static LocString TOOLTIP = (LocString)"Sending objects to the server. More objects cannot be sent until all previous objects are sent.";
+            }
         }
         public static class NETWORK {
             public static LocString GENERATE_MISSING_PASSED_UNKNOWN = (LocString)"GENERATE MISSING: WAS PASSED AN UNKNOWN MESSAGE TYPE";
@@ -55,6 +60,10 @@ namespace STRINGS {
             public static LocString PING_INTERVAL = (LocString)"Ping Interval";
             public static LocString PING_TOOLTIP = (LocString)"How often to ping the server. Useful when dealing with routers that like to drop connections. Leave empty or set to 0 to disable pinging.";
         }
+        public static class DROP_BOX {
+            public static LocString SEND = (LocString)"Send Contents";
+            public static LocString TOOLTIP = (LocString)"Transfer contents to the server one by one";
+        }
     }
 }
 
@@ -73,7 +82,11 @@ namespace ZTransport
 
         public static StatusItemCategory serverStatus;
 
+        public static StatusItemCategory dropBoxStatus;
+
         public static StatusItem notConnected;
+
+        public static StatusItem dropBoxSending;
 
         public static Network net;
     }

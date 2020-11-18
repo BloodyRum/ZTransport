@@ -70,6 +70,21 @@ namespace ZTransport
                 Z.notConnected.AddNotification();
                 __instance.Add(Z.notConnected);
 
+
+                // Drop box sending status
+                Z.dropBoxSending = new StatusItem("ZDropBoxStatus",
+                                                  "ZTRANSPORT", "",
+                                                  StatusItem.IconType.Info,
+                                                  NotificationType.Neutral,
+                                                  false,
+                                                  OverlayModes.None.ID);
+                Z.dropBoxSending.resolveStringCallback = (str, data) => {
+                    int object_count = (int)data;
+                    return str.Replace("{COUNT}", object_count.ToString());
+                };
+                __instance.Add(Z.dropBoxSending);
+
+
             }
         }
 
@@ -144,6 +159,22 @@ namespace ZTransport
                             "Takes liquid from another Z level");
                 ModUtil.AddBuildingToPlanScreen("Plumbing", LiquidRecverConfig.ID);
 
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.NAME",
+                            "Z Drop Box Out");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.DESC",
+                            "Sends and buffers solids to another Z level");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.EFFECT",
+                            "Sends and buffers solids to another Z level");
+                ModUtil.AddBuildingToPlanScreen("Conveyance", DropBoxOutConfig.ID);
+
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.NAME",
+                            "Z Drop Box In");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.DESC",
+                            "Receives and buffers solids from another Z level");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.EFFECT",
+                            "Receives and buffers solids from another Z level");
+                ModUtil.AddBuildingToPlanScreen("Conveyance", DropBoxInConfig.ID);
+
             }
         }
 
@@ -217,6 +248,8 @@ namespace ZTransport
         public class StatusItemCategoriesPatch {
             public static void Postfix(StatusItemCategories __instance) {
                 Z.serverStatus = new StatusItemCategory(nameof (Z.serverStatus), (ResourceSet) __instance, nameof (Z.serverStatus));
+
+                Z.dropBoxStatus = new StatusItemCategory(nameof (Z.dropBoxStatus), (ResourceSet) __instance, nameof (Z.dropBoxStatus));
             }
         }
 

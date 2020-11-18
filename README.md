@@ -1,4 +1,4 @@
-This is ZTransport, a mod for Oxygen Not Included. ZTransport allows multiple Oxygen Not Included colonies to exchange energy, gases, and liquids, as though they were different Z-slices of the same asteroid. This adds some interesting teamwork opportunities to the game.
+This is ZTransport, a mod for Oxygen Not Included. ZTransport allows multiple Oxygen Not Included colonies to exchange energy, gases, liquids, and items, as though they were different Z-slices of the same asteroid. This adds some interesting teamwork opportunities to the game.
 
 This mod was produced as part of an apprenticeship. The bulk of the client's code was written by BloodyRum, under the oppressive and pedantic gaze of Solra Bizna (who also wrote this readme).
 
@@ -10,7 +10,7 @@ One of the players must run a server in order for the mod to be useful. The serv
 
 # Features
 
-- Transport gases, liquids, and energy between colonies running at the same time on different computers
+- Transport gases, liquids, items, and energy between colonies running at the same time on different computers
 - All elements can be transmitted
 - Temperature, mass, and even germs are preserved
 
@@ -31,11 +31,7 @@ Once these buildings are constructed, Alice must run a Gas Pipe from her oxygen 
 These features are **not yet present**, but are planned to be added some day:
 
 - Transporting solids along conveyors
-- Transporting solids through "drop boxes"
 - **Z Power Sender** working more like a Transformer than a Battery (and multiple versions of it at different power ratings)
-- "Ghost" images of **Z** buildings in other colonies that don't yet have a counterpart in the current colony (to make lining things up easier)
-- Better error messages
-- Integrated server
 - Optional game speed syncing, for players who would rather annoy each other than *slightly* cheat time in a game whose plot revolves around a giant apocalyptic time anomaly...
 
 # Legalese

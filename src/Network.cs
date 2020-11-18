@@ -242,6 +242,16 @@ namespace ZTransport
                     // recieved from the packet to be null
 
                     return fake_returned;
+                case "send_object":
+                    fake_returned.Add("type", "sent_object");
+                    fake_returned.Add("accepted", "false");
+
+                    return fake_returned;
+                case "recv_object":
+                    fake_returned.Add("type", "got_object");
+                    fake_returned.Add("object", null);
+
+                    return fake_returned;
                 default:
                     throw new Exception(STRINGS.ZTRANSPORT.NETWORK.GENERATE_MISSING_PASSED_UNKNOWN);
             }
@@ -441,7 +451,7 @@ namespace ZTransport
                     JObject hello = new JObject();
                     hello.Add("type", "hello");
                     hello.Add("proto", "oniz");
-                    hello.Add("version", 1);
+                    hello.Add("version", 2);
                     write_directly(this.stream, hello);
 
                     JObject response = read_directly(sr);
