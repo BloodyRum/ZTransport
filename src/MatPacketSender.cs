@@ -39,6 +39,8 @@ namespace ZTransport {
 #pragma warning disable 0649
         [MyCmpReq]
         private Operational operational;
+        [MyCmpReq]
+        private BuildingEnabledButton enabled_button;
 #pragma warning restore 0649
 
         [SerializeField]
@@ -154,7 +156,8 @@ namespace ZTransport {
                 }
                 outstanding = false;
             }
-            if(!outstanding) {
+            // Only make and send a message if we are enabled
+            if(!outstanding && enabled_button.IsEnabled) {
                 // We are not currently waiting for a message
                 // so make a message (if necessary), and then wait for response
 

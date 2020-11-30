@@ -36,6 +36,11 @@ namespace ZTransport {
         [MyCmpReq]
         public Storage storage;
 
+        #pragma warning disable 0649
+        [MyCmpGet]
+        private BuildingEnabledButton enabled_button;
+        #pragma warning restore 0649
+
         [SerializeField]
         public bool isOn = true;
 
@@ -119,7 +124,9 @@ namespace ZTransport {
                 }
                 outstanding = false;
             }
-            if(!outstanding && objects.Count != 0) {
+            // Only send message when enabled, you know the rest
+            bool enabled = (enabled_button == null) || enabled_button.IsEnabled;
+            if(!outstanding && objects.Count != 0 && enabled) {
                 // We are not currently waiting for a message
                 // so make a message, and then wait for response
                 message = Network.make_message("send_object", x, y);

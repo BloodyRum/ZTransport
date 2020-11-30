@@ -31,6 +31,11 @@ namespace ZTransport {
         bool outstanding = false;
         int outstanding_joules = 0;
 
+        #pragma warning disable 0649
+        [MyCmpReq]
+        private BuildingEnabledButton enabled_button;
+        #pragma warning restore 0649
+
         protected override void OnSpawn() {
             base.OnSpawn();
             this.battery = this.GetComponent<Battery>();
@@ -51,7 +56,8 @@ namespace ZTransport {
                 outstanding = false;
                 outstanding_joules = 0;
             }
-            if(!outstanding) {
+            // Only send messages to the server if we are actually enabled
+            if(!outstanding && enabled_button.IsEnabled) {
                 // We are not currently waiting for a message
                 // so make a message, and then wait for response
                 int int_joules_to_send = (int)this.battery.JoulesAvailable;

@@ -69,6 +69,8 @@ namespace ZTransport {
         {
             Prioritizable.AddRef(go);
 
+            go.AddOrGet<BuildingEnabledButton>();
+
             go.AddOrGet<ObjectRecver>();
         }
     }

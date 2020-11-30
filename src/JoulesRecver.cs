@@ -26,6 +26,11 @@ namespace ZTransport {
     {
         private bool outstanding = false;
 
+        #pragma warning disable 0649
+        [MyCmpReq]
+        private BuildingEnabledButton enabled_button;
+        #pragma warning restore 0649
+
         public override void EnergySim200ms(float dt)
         {
             base.EnergySim200ms(dt);
@@ -46,7 +51,9 @@ namespace ZTransport {
                 // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa. -SB
                 outstanding = false;
             }
-            if(!outstanding) {
+            // Only send a message if we need to, AND the building has not been
+            // disabled
+            if(!outstanding && enabled_button.IsEnabled) {
                 // Time to make a message to send to the server
                 int amount_to_request = (int)(this.Capacity - this.JoulesAvailable);
                 if (amount_to_request > 0) {

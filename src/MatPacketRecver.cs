@@ -38,10 +38,14 @@ namespace ZTransport {
         public bool invertElementFilter;
         [SerializeField]
         public bool blocked;
-        [MyCmpReq]
+
 #pragma warning disable 0649
+        [MyCmpReq]
         private Operational operational;
+        [MyCmpReq]
+        private BuildingEnabledButton enabled_button;
 #pragma warning restore 0649
+
         private HandleVector<int>.Handle partitionerEntry;
 
         public ConduitType TypeOfConduit
@@ -176,7 +180,8 @@ namespace ZTransport {
                     ret = steve;
                 }
             }
-            if (!outstanding) {
+            // Only ask for goodies when we are enabled
+            if (!outstanding && enabled_button.IsEnabled) {
                 // Send a message to the server asking for goodies
 
                 message = Network.make_message("recv_packet", x, y);

@@ -30,9 +30,11 @@ namespace ZTransport {
     [AddComponentMenu("KMonoBehaviour/scripts/ObjectRecver")]
     public class ObjectRecver : KMonoBehaviour, ISaveLoadable, ISim1000ms
     {
-        [MyCmpReq]
 #pragma warning disable 0649
+        [MyCmpReq]
         private Storage storage;
+        [MyCmpGet]
+        private BuildingEnabledButton enabled_button;
 #pragma warning restore 0649
 
         bool outstanding = false;
@@ -86,7 +88,9 @@ namespace ZTransport {
                                                   // we are *storing*
                 }
             }
-            if (!outstanding && !storage.IsFull()) {
+            // Only send when we are enabled
+            bool enabled = (enabled_button == null) || enabled_button.IsEnabled;
+            if(!outstanding && !storage.IsFull() && enabled) {
                 // Send a message to the server asking for an object
 
                 message = Network.make_message("recv_object", x, y);
