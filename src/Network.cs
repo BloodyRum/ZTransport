@@ -428,10 +428,21 @@ namespace ZTransport
             
             while(true) {
                 try {
+                    string saved_address;
+                    ushort saved_port;
                     lock(this) {
                         connection_error = null;
                         while(address == null) Monitor.Wait(this);
-                        client = new TcpClient(address, port);
+                        saved_address = address;
+                        saved_port = port;
+                    }
+
+                    // Try to make the client outside the lock, otherwise will
+                    // game will hang if a Ztransport item tries to access the
+                    // network while trying to connect
+                    client = new TcpClient(saved_address, saved_port);
+
+                    lock(this) {
                         reconnecting = false;
                     }
                 }
