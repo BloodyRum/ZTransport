@@ -42,6 +42,8 @@ namespace ZTransport {
             buildingDef.Overheatable = false;
             buildingDef.Entombable = false;
 
+            buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+
             GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs,
                                                    ID);
             return buildingDef;

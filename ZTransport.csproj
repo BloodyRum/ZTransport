@@ -109,6 +109,8 @@
     <Compile Include="src\DropBoxSendButton.cs" />
     <Compile Include="src\ZConnectionStatusDisplayer.cs" />
     <Compile Include="src\DropBoxOutStatusDisplayer.cs" />
+    <Compile Include="src\ConveyorSenderConfig.cs" />
+    <Compile Include="src\ConveyorRecverConfig.cs" />
     <Compile Include="src\ZServerInfoSaver.cs" />
     <Compile Include="src\Z.cs" />
     <Compile Include="src\OperationalGlueShimThing.cs" />

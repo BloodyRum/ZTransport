@@ -25,7 +25,12 @@ namespace ZTransport {
         private KSelectable selectable;
         [MyCmpGet]
         private Operational operational;
-        #pragma warning restore 649
+        [MyCmpGet]
+        private BuildingEnabledButton enabled_button;
+        #pragma warning disable 169
+        [MyCmpAdd]
+        private LogicOperationalController logiccontroller;
+        #pragma warning restore 169, 649
 
         private static Operational.Flag remote_connected = new Operational.Flag("remote_connected", Operational.Flag.Type.Requirement);
 
@@ -36,9 +41,20 @@ namespace ZTransport {
 
         int x, y;
 
+        bool registered = false;
+
         public void Sim1000ms(float dt) {
+            bool enabled = is_enabled();
+            if(enabled && !registered) {
+                Z.net.register_local_device(x, y, local_id);
+                registered = true;
+            }
+            else if(!enabled && registered) {
+                Z.net.unregister_local_device(x, y, local_id);
+                registered = false;
+            }
             this.operational.SetFlag(remote_connected,
-                                     should_be_operational());
+                                     is_linked());
         }
 
         protected override void OnSpawn() {
@@ -47,14 +63,14 @@ namespace ZTransport {
                                      Z.coordinates, (object)this);
 
             Grid.CellToXY(Grid.PosToCell(this), out x, out y);
-
-            Z.net.register_local_device(x, y, local_id);
         }
 
         protected override void OnCleanUp() {
             base.OnCleanUp();
-
-            Z.net.unregister_local_device(x, y, local_id);
+            if (registered) {
+                Z.net.unregister_local_device(x, y, local_id);
+                registered = false;
+            }
         }
 
         public void SetLocalAndExpectedID(string local_id,
@@ -63,11 +79,17 @@ namespace ZTransport {
             this.expected_id = expected_id;
         }
 
-        private bool should_be_operational() {
+        public bool is_enabled_and_linked() {
+            return is_linked() && is_enabled();
+        }
+
+        public bool is_linked() {
             return Z.net.remote_device_exists(x, y, expected_id);
+        }
+
+        public bool is_enabled() {
+            return (enabled_button == null || enabled_button.IsEnabled)
+                && operational.GetFlag(LogicOperationalController.LogicOperationalFlag);
         }
     }
 }
-
-
-// Senders always operational, recvers not

@@ -37,6 +37,8 @@ namespace ZTransport {
             buildingDef.Overheatable = false;
             buildingDef.Entombable = false;
 
+            buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+
             return buildingDef;
         }
 

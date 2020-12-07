@@ -44,6 +44,9 @@ namespace ZTransport {
             buildingDef.Floodable = false;
             buildingDef.Overheatable = false;
             buildingDef.Entombable = true;
+
+            buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+
             return buildingDef;
         }
 

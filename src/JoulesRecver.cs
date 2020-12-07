@@ -28,7 +28,7 @@ namespace ZTransport {
 
         #pragma warning disable 0649
         [MyCmpReq]
-        private BuildingEnabledButton enabled_button;
+        private ZTransporter ztransporter;
         #pragma warning restore 0649
 
         public override void EnergySim200ms(float dt)
@@ -53,7 +53,7 @@ namespace ZTransport {
             }
             // Only send a message if we need to, AND the building has not been
             // disabled
-            if(!outstanding && enabled_button.IsEnabled) {
+            if(!outstanding && ztransporter.is_enabled()) {
                 // Time to make a message to send to the server
                 int amount_to_request = (int)(this.Capacity - this.JoulesAvailable);
                 if (amount_to_request > 0) {

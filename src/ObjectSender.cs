@@ -38,11 +38,10 @@ namespace ZTransport {
 
         #pragma warning disable 0649
         [MyCmpGet]
-        private BuildingEnabledButton enabled_button;
+        private ZTransporter ztransporter;
         #pragma warning restore 0649
 
-        [SerializeField]
-        public bool isOn = true;
+        public bool autoSend = false;
 
         protected override void OnSpawn()
         {
@@ -116,6 +115,10 @@ namespace ZTransport {
             int x, y;
             Grid.CellToXY(Grid.PosToCell(this), out x, out y);
 
+            // Buffer five objects to send, that way you dont only get
+            // 20g (or whatever) per second
+            if (autoSend && (objects.Count <= 5)) add_to_object_list();
+
             JObject message = Z.net.get_message_for("sent_object", x, y);
             if(outstanding && message != null) {
                 // We got a response from the server, deal with it
@@ -125,8 +128,7 @@ namespace ZTransport {
                 outstanding = false;
             }
             // Only send message when enabled, you know the rest
-            bool enabled = (enabled_button == null) || enabled_button.IsEnabled;
-            if(!outstanding && objects.Count != 0 && enabled) {
+            if(!outstanding && objects.Count != 0 && ztransporter.is_enabled_and_linked()) {
                 // We are not currently waiting for a message
                 // so make a message, and then wait for response
                 message = Network.make_message("send_object", x, y);

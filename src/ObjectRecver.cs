@@ -34,7 +34,7 @@ namespace ZTransport {
         [MyCmpReq]
         private Storage storage;
         [MyCmpGet]
-        private BuildingEnabledButton enabled_button;
+        private ZTransporter ztransporter;
 #pragma warning restore 0649
 
         bool outstanding = false;
@@ -89,8 +89,7 @@ namespace ZTransport {
                 }
             }
             // Only send when we are enabled
-            bool enabled = (enabled_button == null) || enabled_button.IsEnabled;
-            if(!outstanding && !storage.IsFull() && enabled) {
+            if(!outstanding && !storage.IsFull() && ztransporter.is_enabled()) {
                 // Send a message to the server asking for an object
 
                 message = Network.make_message("recv_object", x, y);

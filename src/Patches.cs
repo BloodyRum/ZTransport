@@ -175,6 +175,22 @@ namespace ZTransport
                             "Receives and buffers solids from another Z level");
                 ModUtil.AddBuildingToPlanScreen("Conveyance", DropBoxInConfig.ID);
 
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORSENDER.NAME",
+                            "Z Conveyor Sender");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORSENDER.DESC",
+                            "Sends and buffers solids to another Z level");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORSENDER.EFFECT",
+                            "Sends and buffers solids to another Z level");
+                ModUtil.AddBuildingToPlanScreen("Conveyance", ConveyorSenderConfig.ID);
+
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORRECVER.NAME",
+                            "Z Conveyor Recver");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORRECVER.DESC",
+                            "Receives and buffers solids from another Z level");
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZCONVEYORRECVER.EFFECT",
+                            "Receives and buffers solids from another Z level");
+                ModUtil.AddBuildingToPlanScreen("Conveyance", ConveyorRecverConfig.ID);
+
             }
         }
 

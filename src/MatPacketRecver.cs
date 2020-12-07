@@ -43,7 +43,7 @@ namespace ZTransport {
         [MyCmpReq]
         private Operational operational;
         [MyCmpReq]
-        private BuildingEnabledButton enabled_button;
+        private ZTransporter ztransporter;
 #pragma warning restore 0649
 
         private HandleVector<int>.Handle partitionerEntry;
@@ -181,7 +181,7 @@ namespace ZTransport {
                 }
             }
             // Only ask for goodies when we are enabled
-            if (!outstanding && enabled_button.IsEnabled) {
+            if (!outstanding && ztransporter.is_enabled()) {
                 // Send a message to the server asking for goodies
 
                 message = Network.make_message("recv_packet", x, y);
