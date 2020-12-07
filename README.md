@@ -28,9 +28,8 @@ Once these buildings are constructed, Alice must run a Gas Pipe from her oxygen 
 
 # Missing
 
-These features are **not yet present**, but are planned to be added some day:
+These features are **not yet present**, and were originally planned, but probably won't get added unless someone else writes them:
 
-- Transporting solids along conveyors
 - **Z Power Sender** working more like a Transformer than a Battery (and multiple versions of it at different power ratings)
 - Optional game speed syncing, for players who would rather annoy each other than *slightly* cheat time in a game whose plot revolves around a giant apocalyptic time anomaly...
 
