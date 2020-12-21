@@ -20,10 +20,10 @@ using TUNING;
 using UnityEngine;
 
 namespace ZTransport {
-    public class DropBoxOutConfig : IBuildingConfig
+    public class DropBoxSenderConfig : IBuildingConfig
     {
 
-        public const string ID = "ZDropBoxOut";
+        public const string ID = "ZDropBoxSender";
 
         public override BuildingDef CreateBuildingDef()
         {
@@ -57,7 +57,7 @@ namespace ZTransport {
             go.AddOrGet<ZConfigButton>();
 
             go.AddOrGet<DropBoxSendButton>();
-            go.AddOrGet<DropBoxOutStatusDisplayer>();
+            go.AddOrGet<DropBoxSenderStatusDisplayer>();
 
             go.AddOrGet<OperationalGlueShimThing>();
 

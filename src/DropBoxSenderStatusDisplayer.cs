@@ -18,7 +18,7 @@
 using UnityEngine;
 
 namespace ZTransport {
-    public class DropBoxOutStatusDisplayer : KMonoBehaviour, ISim200ms {
+    public class DropBoxSenderStatusDisplayer : KMonoBehaviour, ISim200ms {
 
         #pragma warning disable 649
         [MyCmpReq]

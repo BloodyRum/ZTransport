@@ -20,10 +20,10 @@ using TUNING;
 using UnityEngine;
 
 namespace ZTransport {
-    public class DropBoxInConfig : IBuildingConfig
+    public class DropBoxRecverConfig : IBuildingConfig
     {
 
-        public const string ID = "ZDropBoxIn";
+        public const string ID = "ZDropBoxRecver";
 
         public override BuildingDef CreateBuildingDef()
         {
