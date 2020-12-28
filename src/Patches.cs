@@ -31,9 +31,9 @@ namespace ZTransport
         {
             public static void OnLoad()
             {
+                Z.net = new Network();
                 PUtil.InitLibrary(true);
                 PLocalization.Register();
-                Z.net = new Network();
             }
         }
 

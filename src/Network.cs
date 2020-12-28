@@ -25,6 +25,8 @@ using System.Net.Sockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Ionic.Zlib;
+
 namespace ZTransport
 {
     class Point : IEquatable<Point> {
@@ -48,7 +50,7 @@ namespace ZTransport
             }
             else return null;
         }
-        
+
         public bool Equals(Point other) {
             return this.x == other.x && this.y == other.y;
         }
@@ -68,7 +70,7 @@ namespace ZTransport
             : base(message, inner) {}
     }
     public class Network {
-        NetworkStream stream;
+        Stream stream;
         Thread read_thread, write_thread, ping_thread;
 
         // access to any of the following variables must be protected by a lock
@@ -85,7 +87,7 @@ namespace ZTransport
             = new Dictionary<Point, List<string>>();
         Dictionary<Point, string> registered_local_devices
             = new Dictionary<Point, string>();
-        
+
         bool connection_active = false;
         bool reconnecting = false;
         // exception to locking rule: outgoing_messages
@@ -94,9 +96,9 @@ namespace ZTransport
 
         string address;
         ushort port;
-        
+
         public Network() {
-            read_thread = new Thread(new ThreadStart(() => read_thread_function())); 
+            read_thread = new Thread(new ThreadStart(() => read_thread_function()));
             read_thread.IsBackground = true;
             read_thread.Start();
         }
@@ -113,16 +115,17 @@ namespace ZTransport
             }
         }
 
-        private void write_directly(NetworkStream stream, JObject message) {
+        private void write_directly(Stream stream, JObject message) {
             string message_as_string
                 = JsonConvert.SerializeObject(message) + "\n";
             Byte[] data
                 = System.Text.Encoding.UTF8.GetBytes(message_as_string);
             stream.Write(data, 0, data.Length);
+            stream.Flush();
         }
 
         public void write_thread_function() {
-            NetworkStream stream = this.stream;
+            Stream stream = this.stream;
             while(true) {
                 JObject next_message_to_send = outgoing_messages.Take();
                 write_directly(stream, next_message_to_send);
@@ -187,12 +190,13 @@ namespace ZTransport
             }
         }
 
-        private JObject read_directly(StreamReader sr) {
+        private JObject read_directly(ProtoReader sr) {
             string line = sr.ReadLine();
             if(line == null) {
                 // FUCK THE WORLD! ALL HELLS GONE LOOSE!
                 throw new ServerDiedException("Bye bye");
             }
+            Debug.Log("Received a message from the server. " + line);
             return JObject.Parse(line);
         }
 
@@ -425,7 +429,7 @@ namespace ZTransport
 
         public void read_thread_function() {
             connection_active = false;
-            
+
             while(true) {
                 try {
                     string saved_address;
@@ -455,17 +459,35 @@ namespace ZTransport
                     Thread.Sleep(5000);
                     continue;
                 }
-                stream = client.GetStream();
-                StreamReader sr = new StreamReader(stream);
+                PeekableStream peekable_stream = new PeekableStream(client.GetStream(), 1);
+                stream = peekable_stream;
+                ProtoReader reader;
 
                 try {
                     JObject hello = new JObject();
                     hello.Add("type", "hello");
                     hello.Add("proto", "oniz");
                     hello.Add("version", 2);
+                    hello.Add("compression", "Zlib");
                     write_directly(this.stream, hello);
 
-                    JObject response = read_directly(sr);
+                    // if the first character is {
+                    // then the stream is not compressed
+                    byte[] buffer = new byte[1];
+                    if (peekable_stream.Peek(buffer, 0, 1) != 1) {
+                        throw new ServerDiedException("Couldn't peeking into servers response");
+                    }
+
+                    if (buffer[0] != '{') {
+                        reader = new ProtoReader(stream, true);
+                        ZlibStream zlib_stream = new ZlibStream(stream, CompressionMode.Compress);
+                        zlib_stream.FlushMode = FlushType.Sync;
+                        this.stream = zlib_stream;
+                    } else {
+                        reader = new ProtoReader(stream, false);
+                    }
+
+                    JObject response = read_directly(reader);
 
                     // The old server, version 0, had an undocumented response
                     // called "bad_version", which it sent out if the clients
@@ -532,8 +554,7 @@ namespace ZTransport
                     ping_thread.Start();
 
                     while(true) {
-                        JObject message = read_directly(sr);
-
+                        JObject message = read_directly(reader);
                         handle_message(message);
                     }
                 }
@@ -551,6 +572,10 @@ namespace ZTransport
                     Debug.Log(e);
                 }
                 catch (JsonReaderException e) {
+                    raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.CORRUPTED_MESSAGE);
+                    Debug.Log(e);
+                }
+                catch (ZlibException e) {
                     raise_connection_error(STRINGS.ZTRANSPORT.NETWORK.CORRUPTED_MESSAGE);
                     Debug.Log(e);
                 }
@@ -590,7 +615,7 @@ namespace ZTransport
                     ping_thread.Abort();
                     ping_thread.Join();
                 }
-                
+
                 write_thread = null;
                 ping_thread = null;
                 client.Close();
@@ -601,7 +626,7 @@ namespace ZTransport
                 Thread.Sleep(5000);
             }
         }
-        
+
         public static JObject make_message(string type, int x, int y) {
             JObject new_message = new JObject();
             new_message.Add("type", type);

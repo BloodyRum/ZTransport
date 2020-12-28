@@ -82,6 +82,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>lib\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip.dll">
+      <HintPath>lib\Ionic.Zip.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\AssemblyInfo.cs" />
@@ -113,7 +116,9 @@
     <Compile Include="src\ConveyorRecverConfig.cs" />
     <Compile Include="src\ZServerInfoSaver.cs" />
     <Compile Include="src\Z.cs" />
+    <Compile Include="src\PeekableStream.cs" />
     <Compile Include="src\OperationalGlueShimThing.cs" />
+    <Compile Include="src\ProtoReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
