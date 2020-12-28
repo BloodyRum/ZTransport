@@ -159,19 +159,19 @@ namespace ZTransport
                             "Takes liquid from another Z level");
                 ModUtil.AddBuildingToPlanScreen("Plumbing", LiquidRecverConfig.ID);
 
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXSENDER.NAME",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.NAME",
                             "Z Drop Box Sender");
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXSENDER.DESC",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.DESC",
                             "Sends and buffers solids to another Z level");
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXSENDER.EFFECT",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXOUT.EFFECT",
                             "Sends and buffers solids to another Z level");
                 ModUtil.AddBuildingToPlanScreen("Conveyance", DropBoxSenderConfig.ID);
 
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXRECVER.NAME",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.NAME",
                             "Z Drop Box Reciever");
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXRECVER.DESC",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.DESC",
                             "Receives and buffers solids from another Z level");
-                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXRECVER.EFFECT",
+                Strings.Add("STRINGS.BUILDINGS.PREFABS.ZDROPBOXIN.EFFECT",
                             "Receives and buffers solids from another Z level");
                 ModUtil.AddBuildingToPlanScreen("Conveyance", DropBoxRecverConfig.ID);
 

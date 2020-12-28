@@ -23,7 +23,7 @@ namespace ZTransport {
     public class DropBoxSenderConfig : IBuildingConfig
     {
 
-        public const string ID = "ZDropBoxSender";
+        public const string ID = "ZDropBoxOut";
 
         public override BuildingDef CreateBuildingDef()
         {
