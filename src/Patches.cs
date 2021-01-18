@@ -41,7 +41,9 @@ namespace ZTransport
         public class CreateStatusItems {
             public static void Postfix(BuildingStatusItems __instance) {
                 // Building cords
-                Z.coordinates = new StatusItem("ZCoordinates", "ZTRANSPORT","",
+                Z.coordinates = new StatusItem("ZCoordinates",
+                                               "ZTRANSPORT",
+                                               "",
                                                StatusItem.IconType.Info,
                                                NotificationType.Neutral,
                                                false,
@@ -54,12 +56,13 @@ namespace ZTransport
                         .Replace("{Y}", y.ToString());
                 };
                 __instance.Add(Z.coordinates);
-
+                Z.coordinates.resolveTooltipCallback = Z.coordinates.resolveStringCallback;
 
                 // Connected status
                 Z.notConnected = new StatusItem("ZNotConnected",
-                                                "ZTRANSPORT", "",
-                                               StatusItem.IconType.Exclamation,
+                                                "ZTRANSPORT",
+                                                "",
+                                                StatusItem.IconType.Exclamation,
                                                 NotificationType.BadMinor,
                                                 false,
                                                 OverlayModes.None.ID);
@@ -67,13 +70,15 @@ namespace ZTransport
                     string ererrroroor = (string)data;
                     return str.Replace("{REASON}", ererrroroor);
                 };
-                Z.notConnected.AddNotification();
+                Z.notConnected.resolveTooltipCallback = Z.notConnected.resolveStringCallback;
+                Z.notConnected.AddNotification(null, (string)STRINGS.ZTRANSPORT.STATUSITEMS.ZNOTCONNECTED.NAME, (string)STRINGS.ZTRANSPORT.STATUSITEMS.ZNOTCONNECTED.TOOLTIP);
                 __instance.Add(Z.notConnected);
 
 
                 // Drop box sending status
                 Z.dropBoxSending = new StatusItem("ZDropBoxStatus",
-                                                  "ZTRANSPORT", "",
+                                                  "ZTRANSPORT",
+                                                  "",
                                                   StatusItem.IconType.Info,
                                                   NotificationType.Neutral,
                                                   false,
@@ -83,7 +88,7 @@ namespace ZTransport
                     return str.Replace("{COUNT}", object_count.ToString());
                 };
                 __instance.Add(Z.dropBoxSending);
-
+                Z.dropBoxSending.resolveTooltipCallback = Z.dropBoxSending.resolveStringCallback;
 
             }
         }
