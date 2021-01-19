@@ -1,5 +1,7 @@
 This is ZTransport, a mod for Oxygen Not Included. ZTransport allows multiple Oxygen Not Included colonies to exchange energy, gases, liquids, and items, as though they were different Z-slices of the same asteroid. This adds some interesting teamwork opportunities to the game.
 
+ZTransport works with the Spaced Out! DLC. Different asteroids can send materials to corresponding asteroids on a different computer.
+
 This mod was produced as part of an apprenticeship. The bulk of the client's code was written by BloodyRum, under the oppressive and pedantic gaze of Solra Bizna (who also wrote this readme).
 
 # Installation
