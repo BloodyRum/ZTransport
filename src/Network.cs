@@ -196,7 +196,7 @@ namespace ZTransport
                 // FUCK THE WORLD! ALL HELLS GONE LOOSE!
                 throw new ServerDiedException("Bye bye");
             }
-            Debug.Log("Received a message from the server. " + line);
+            //Debug.Log("Received a message from the server. " + line);
             return JObject.Parse(line);
         }
 
