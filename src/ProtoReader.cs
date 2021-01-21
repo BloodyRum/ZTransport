@@ -85,8 +85,8 @@ namespace ZTransport {
             }
             else if(start > 0) {
                 // Not quite as easy.
-                Array.Copy(decompressed_buffer, 0,
-                           decompressed_buffer, start, end - start);
+                Array.Copy(decompressed_buffer, start,
+                           decompressed_buffer, 0, end - start);
                 pos -= start;
                 end -= start;
                 start = 0;
@@ -99,8 +99,8 @@ namespace ZTransport {
                 }
                 byte[] new_buffer = new byte[decompressed_buffer.Length * 2];
                 Debug.Log("ProtoReader buffer growing to "+(new_buffer.Length)+" bytes.");
-                Array.Copy(new_buffer, 0,
-                           decompressed_buffer, 0, end);
+                Array.Copy(decompressed_buffer, 0,
+                           new_buffer, 0, end);
                 decompressed_buffer = new_buffer;
             }
             // Okay, now we read. How this works depends on whether we're using
