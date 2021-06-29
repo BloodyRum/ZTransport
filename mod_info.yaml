@@ -1,2 +1,5 @@
-supportedContent: EXPANSION1_ID
-lastWorkingBuild: 447598
+supportedContent: VANILLA_ID,EXPANSION1_ID
+minimumSupportedBuild: 469287
+APIVersion: 2
+version: "1.2.0"
+staticID: "oniztransport"

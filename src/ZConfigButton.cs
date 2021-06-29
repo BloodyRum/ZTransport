@@ -18,6 +18,7 @@
 using UnityEngine;
 using TMPro;
 using PeterHan.PLib.UI;
+using PeterHan.PLib.Core;
 
 namespace ZTransport {
     public class ZConfigButton : KMonoBehaviour {
@@ -67,7 +68,7 @@ namespace ZTransport {
                            PUITuning.Colors.ButtonPinkStyle)
                 .AddButton(PDialog.DIALOG_KEY_CLOSE,
                            STRINGS.UI.CONFIRMDIALOG.CANCEL,
-                           PUIStrings.TOOLTIP_CANCEL,
+                           PLibStrings.TOOLTIP_CANCEL,
                            PUITuning.Colors.ButtonBlueStyle);
             var body = dialog.Body;
             var panel = new PPanel("ConnectionSettings") {

@@ -15,26 +15,21 @@
  * ZTransport. If not, see <https://www.gnu.org/licenses/>.
  */
 
-using Harmony;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using Database;
 using UnityEngine;
-using PeterHan.PLib;
-using PeterHan.PLib.Datafiles;
+using PeterHan.PLib.Core;
+using PeterHan.PLib.Database;
 
-namespace ZTransport
-{
-    public class Patches
-    {
-        public static class Mod_OnLoad
-        {
-            public static void OnLoad()
-            {
-                Z.net = new Network();
-                PUtil.InitLibrary(true);
-                PLocalization.Register();
-            }
+namespace ZTransport {
+    public class Patches : KMod.UserMod2 {
+        public override void OnLoad(Harmony harmony) {
+            base.OnLoad(harmony);
+            Z.net = new Network();
+            PUtil.InitLibrary(true);
+            new PLocalization().Register();
         }
 
         [HarmonyPatch(typeof(BuildingStatusItems), "CreateStatusItems")]
