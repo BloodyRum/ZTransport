@@ -31,8 +31,6 @@ namespace ZTransport {
     [AddComponentMenu("KMonoBehaviour/scripts/ObjectSender")]
     public class ObjectSender : KMonoBehaviour, ISaveLoadable, ISim1000ms {
 
-        private const int MAX_MESSAGE_SIZE = 4096;
-
         [MyCmpReq]
         public Storage storage;
 
@@ -80,14 +78,14 @@ namespace ZTransport {
 
             KSerialization.Manager.Clear();
 
-            MemoryStream stream = new MemoryStream(MAX_MESSAGE_SIZE);
+            MemoryStream stream = new MemoryStream(Z.max_message_size);
             BinaryWriter writer = new BinaryWriter(stream);
 
             suitableObject.AddOrGet<SaveLoadRoot>().SaveWithoutTransform(writer);
 
             byte[] serialized_object = stream.ToArray();
             // oh boy... -SB
-            stream = new MemoryStream(MAX_MESSAGE_SIZE);
+            stream = new MemoryStream(Z.max_message_size);
             using(DeflateStream deflated = new DeflateStream(stream, CompressionMode.Compress)) {
                 writer = new BinaryWriter(deflated);
                 string name = suitableObject.GetComponent<KPrefabID>().GetSaveLoadTag().Name;
@@ -100,7 +98,7 @@ namespace ZTransport {
             }
 
             var message = stream.ToArray();
-            if (message.Length > MAX_MESSAGE_SIZE) {
+            if (message.Length > Z.max_message_size) {
                 Debug.Log("Object Buffered exceded the max bytes so, I THREW IT ON THE GROUND");
                 drop_item(suitableObject);
             } else {

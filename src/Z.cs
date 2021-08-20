@@ -59,6 +59,8 @@ namespace STRINGS {
             public static LocString PORT_TOOLTIP = (LocString)"Port number of onizd server. Leave empty to use the default port.";
             public static LocString PING_INTERVAL = (LocString)"Ping Interval";
             public static LocString PING_TOOLTIP = (LocString)"How often to ping the server. Useful when dealing with routers that like to drop connections. Leave empty or set to 0 to disable pinging.";
+            public static LocString MAX_MESSAGE_SIZE = (LocString)"Max Message Size";
+            public static LocString MAX_MESSAGE_SIZE_TOOLTIP = (LocString)"Object messages will not be sent to the server over this size.";
         }
         public static class DROP_BOX {
             public static LocString SEND = (LocString)"Send Contents";
@@ -73,6 +75,9 @@ namespace ZTransport
     {
         public const ushort DEFAULT_PORT = 5496;
         public static ushort port = DEFAULT_PORT;
+
+        public const int DEFAULT_MAX_MESSAGE_SIZE = 8192;
+        public static int max_message_size = DEFAULT_MAX_MESSAGE_SIZE;
 
         public const int DEFAULT_PING_INTERVAL = 20;
         public static volatile int ping_interval = DEFAULT_PING_INTERVAL;

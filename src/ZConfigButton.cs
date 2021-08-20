@@ -16,6 +16,7 @@
  */
 
 using UnityEngine;
+using System;
 using TMPro;
 using PeterHan.PLib.UI;
 using PeterHan.PLib.Core;
@@ -30,6 +31,8 @@ namespace ZTransport {
         private static ushort port;
 
         private static int ping_interval;
+
+        private static int max_message_size;
 
         private void RefreshUserMenu(object data = null) {
             KIconButtonMenu.ButtonInfo info;
@@ -54,6 +57,7 @@ namespace ZTransport {
             address = Z.address;
             port = Z.port;
             ping_interval = Z.ping_interval;
+            max_message_size = Z.max_message_size;
 
             var dialog = new PDialog("ZTransportOptions") {
                 Title = "ZTransport Options",
@@ -117,6 +121,21 @@ namespace ZTransport {
                     OnTextChanged = PingIntervalChanged,
                     OnValidate = PingIntervalValidate,
                 });
+            panel.AddChild(new PLabel("MaxOjbectSizeLabel") {
+                    TextAlignment = TextAnchor.UpperLeft,
+                    Text = STRINGS.ZTRANSPORT.UI.MAX_MESSAGE_SIZE,
+                    FlexSize = Vector2.right,
+                    Margin = new RectOffset(0, 10, 0, 10),
+                });
+            panel.AddChild(new PTextField("MaxObjectSizeField") {
+                    Text = Z.max_message_size.ToString(),
+                    TextStyle = PUITuning.Fonts.TextDarkStyle,
+                    FlexSize = Vector2.right,
+                    ToolTip = STRINGS.ZTRANSPORT.UI.MAX_MESSAGE_SIZE_TOOLTIP,
+                    OnTextChanged = MaxObjectSizeChanged,
+                    OnValidate = MaxObjectSizeValidate,
+                });
+
             body.AddChild(panel);
             var built = dialog.Build();
             var screen = built.GetComponent<KScreen>();
@@ -170,11 +189,30 @@ namespace ZTransport {
             // comment wrap, and that wouldn't be worth it." -SB
         }
 
+        private void MaxObjectSizeChanged(GameObject widget, string neu) {
+            if (!neu.Equals("")) {
+                try {
+                    max_message_size = int.Parse(neu);
+                } catch (OverflowException) {
+                    max_message_size = int.MaxValue;
+                }
+            } else {
+                max_message_size = Z.DEFAULT_MAX_MESSAGE_SIZE;
+            }
+        }
+
+        private char MaxObjectSizeValidate(string text, int i, char c) {
+            // ints can't contain non-digit characters
+            if(!(c >= '0' && c <= '9')) return (char)0;
+            return c;
+        }
+
         private void OnDialogClosed(string action) {
             if(action == "ok") {
                 Z.address = address;
                 Z.port = port;
                 Z.ping_interval = ping_interval;
+                Z.max_message_size = max_message_size;
 
                 Z.net.connect(Z.address, Z.port);
             }
